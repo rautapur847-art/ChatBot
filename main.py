@@ -8,7 +8,11 @@ def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
     page.appbar = ft.AppBar(
-        ft.Icon(ft.Icons.DELETE,color="red"),
+    ft.IconButton(
+    icon=ft.Icons.DELETE,
+    icon_color=ft.Colors.RED,
+    tooltip="Delete",
+    ),
     center_title=True,
     bgcolor=ft.Colors.WHITE_10,
     title=ft.Text(
