@@ -23,7 +23,7 @@ def main(page:ft.Page):
         page.update()
     appbar = ft.AppBar(
     ft.IconButton(
-    icon=ft.Icons.DELETE,
+    icon=ft.Icons.MENU,
     icon_color=ft.Colors.RED,
     tooltip="Delete",
     on_click=chats_clear
