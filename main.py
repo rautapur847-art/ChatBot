@@ -8,15 +8,7 @@ def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
     
-    chat_area = ft.Column(
-        expand=True,
-
-        scroll=ft.ScrollMode.AUTO,
-        width=700
-    )
-    def chat_clear(e):
-        chat_area.controls.clear()
-        page.update()
+    
         
     page.appbar = ft.AppBar(
     ft.IconButton(
@@ -40,6 +32,15 @@ def main(page:ft.Page):
         ]
     )
     )
+    chat_area = ft.Column(
+        expand=True,
+
+        scroll=ft.ScrollMode.AUTO,
+        width=700
+    )
+    def chat_clear(e):
+        chat_area.controls.clear()
+        page.update()
     
         
     def show_msg(sender,massage):
