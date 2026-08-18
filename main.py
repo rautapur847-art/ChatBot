@@ -3,7 +3,7 @@ import os
 import asyncio
 import google.generativeai as gn
 gn.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = gn.GenerativeModel("gemini-2.5-flash")
+model = gn.GenerativeModel("gemini-3.6-flash")
 def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
