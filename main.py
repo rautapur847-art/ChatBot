@@ -7,9 +7,7 @@ model = gn.GenerativeModel("gemini-3.6-flash")
 def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
-    def chat_clear(e):
-        chat_area.controls.clear()
-        page.update()
+    
     page.appbar = ft.AppBar(
     ft.IconButton(
     icon=ft.Icons.DELETE,
@@ -32,13 +30,16 @@ def main(page:ft.Page):
         ]
     )
     )
-
+    def chat_clear(e):
+        chat_area.controls.clear()
+        page.update()
     chat_area = ft.Column(
         expand=True,
 
         scroll=ft.ScrollMode.AUTO,
         width=700
     )
+    
     def show_msg(sender,massage):
         chat_area.controls.append(
             ft.Container(
