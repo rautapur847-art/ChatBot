@@ -7,14 +7,10 @@ model = gn.GenerativeModel("gemini-3.6-flash")
 def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
-    
-   def navigation(action):
-       def handler(e):
-           page.close_drawer()
-           action(e)
-       return handler
-   def open_drawer(e):
-       page.show_drawer()
+ 
+    def open_drawer(e):
+        
+        page.show_drawer()
         
         
     
@@ -26,7 +22,9 @@ def main(page:ft.Page):
     )
     def chats_clear(e):
         chat_area.controls.clear()
+        page.close_drawer()
         page.update()
+      
     appbar = ft.AppBar(
     ft.IconButton(
     icon=ft.Icons.MENU,
