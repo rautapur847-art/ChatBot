@@ -7,11 +7,15 @@ model = gn.GenerativeModel("gemini-3.6-flash")
 def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
+    def chat_clear(e):
+        page.chat_area.controls.clear()
+        page.update()
     page.appbar = ft.AppBar(
     ft.IconButton(
     icon=ft.Icons.DELETE,
     icon_color=ft.Colors.RED,
     tooltip="Delete",
+    on_click=chat_clear
     ),
     center_title=True,
     bgcolor=ft.Colors.WHITE_10,
