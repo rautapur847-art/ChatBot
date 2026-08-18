@@ -30,9 +30,7 @@ def main(page:ft.Page):
         ]
     )
     )
-    def chat_clear(e):
-        chat_area.controls.clear()
-        page.update()
+    
         
     chat_area = ft.Column(
         expand=True,
@@ -40,7 +38,9 @@ def main(page:ft.Page):
         scroll=ft.ScrollMode.AUTO,
         width=700
     )
-    
+    def chat_clear(e):
+        chat_area.controls.clear()
+        page.update()
     def show_msg(sender,massage):
         chat_area.controls.append(
             ft.Container(
