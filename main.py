@@ -49,7 +49,7 @@ def main(page:ft.Page):
         ]
     )
     )
-    page.drawer = ft.NavigatinDrawer(
+    page.drawer = ft.NavigationDrawer(
         controls=[
             ft.ListTile(
                 title=ft.Text("Clear chat",color="red"),
