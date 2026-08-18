@@ -25,7 +25,7 @@ def main(page:ft.Page):
         await page.close_drawer()
         page.update()
       
-    appbar = ft.AppBar(
+    page.appbar = ft.AppBar(
     leading=ft.IconButton(
     icon=ft.Icons.MENU,
     icon_color=ft.Colors.RED,
@@ -132,7 +132,7 @@ def main(page:ft.Page):
    
     )
     page.add(
-        appbar,
+       
         chat_area,
         ft.Row(
             controls=[
