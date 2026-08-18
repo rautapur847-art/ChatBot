@@ -8,9 +8,14 @@ def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
     
-    
+    def chatDelete(fun):
+        def delete(e):
+            page.drawer.close()
+            page.update()
+            fun()
+        return delete()    
         
-    
+        
     
     chat_area = ft.Column(
         expand=True,
@@ -26,7 +31,7 @@ def main(page:ft.Page):
     icon=ft.Icons.MENU,
     icon_color=ft.Colors.RED,
     tooltip="Delete",
-    on_click=chats_clear
+    on_click=chatDelete
     ),
     center_title=True,
     bgcolor=ft.Colors.WHITE_10,
@@ -43,7 +48,18 @@ def main(page:ft.Page):
         ]
     )
     )
-        
+    page.drawer = ft.NavigatinDrawer(
+        controls=[
+            ft.ListTile(
+                title=ft.Text("Clear chat",color="red"),
+                leading=ft.IconButton(
+                    icon=ft.Icons.DELETE,
+                    icon_color="red"
+                ),
+                on_click=chats_clear
+            )
+        ]
+    )
     def show_msg(sender,massage):
         chat_area.controls.append(
             ft.Container(
