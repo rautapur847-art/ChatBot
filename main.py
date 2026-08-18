@@ -47,18 +47,21 @@ def main(page:ft.Page):
         ]
     )
     )
-    page.drawer = ft.NavigationDrawer(
-        controls=[
-            ft.ListTile(
-                title=ft.Text("Clear chat",color="red"),
-                leading=ft.IconButton(
-                    icon=ft.Icons.DELETE,
-                    icon_color="red"
-                ),
-                on_click=chats_clear
-            )
-        ]
-    )
+     page.drawer = ft.NavigationDrawer(
+         controls=[
+        ft.ListTile(
+            title=ft.Text(
+                "Clear chat",
+                color="red"
+            ),
+            leading=ft.Icon(
+                ft.Icons.DELETE,
+                color="red"
+            ),
+            on_click=chats_clear
+         )
+      ]
+     )
     def show_msg(sender,massage):
         chat_area.controls.append(
             ft.Container(
