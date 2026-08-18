@@ -10,7 +10,18 @@ def main(page:ft.Page):
     
     
         
-    page.appbar = ft.AppBar(
+    
+    def chat_clear(e):
+        chat_area.controls.clear()
+        page.update()
+    chat_area = ft.Column(
+        expand=True,
+
+        scroll=ft.ScrollMode.AUTO,
+        width=700
+    )
+    
+    appbar = ft.AppBar(
     ft.IconButton(
     icon=ft.Icons.DELETE,
     icon_color=ft.Colors.RED,
@@ -32,17 +43,6 @@ def main(page:ft.Page):
         ]
     )
     )
-    def chat_clear(e):
-        chat_area.controls.clear()
-        page.update()
-    chat_area = ft.Column(
-        expand=True,
-
-        scroll=ft.ScrollMode.AUTO,
-        width=700
-    )
-    
-    
         
     def show_msg(sender,massage):
         chat_area.controls.append(
@@ -114,6 +114,7 @@ def main(page:ft.Page):
    
     )
     page.add(
+        appbar,
         chat_area,
         ft.Row(
             controls=[
