@@ -9,8 +9,8 @@ def main(page:ft.Page):
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
  
     def open_drawer(e):
-        
         page.show_drawer()
+        
         
         
     
@@ -26,7 +26,7 @@ def main(page:ft.Page):
         page.update()
       
     appbar = ft.AppBar(
-    ft.IconButton(
+    leading=ft.IconButton(
     icon=ft.Icons.MENU,
     icon_color=ft.Colors.RED,
     tooltip="Delete",
