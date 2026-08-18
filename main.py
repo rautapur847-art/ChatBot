@@ -31,7 +31,7 @@ def main(page:ft.Page):
     )
     )
     def chat_clear(e):
-        chat_area.controls.clear()
+        page.chat_area.controls.clear()
         page.update()
     chat_area = ft.Column(
         expand=True,
