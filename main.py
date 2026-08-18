@@ -8,12 +8,13 @@ def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
     
-    def chatDelete(fun):
-        def delete(e):
-            page.drawer.close()
-            page.update()
-            fun()
-        return delete()    
+   def navigation(action):
+       def handler(e):
+           page.close_drawer()
+           action(e)
+       return handler
+   def open_drawer(e):
+       page.show_drawer()
         
         
     
@@ -31,7 +32,7 @@ def main(page:ft.Page):
     icon=ft.Icons.MENU,
     icon_color=ft.Colors.RED,
     tooltip="Delete",
-    on_click=chatDelete
+    on_click=open_drawer
     ),
     center_title=True,
     bgcolor=ft.Colors.WHITE_10,
