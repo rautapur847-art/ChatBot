@@ -11,22 +11,22 @@ def main(page:ft.Page):
     
         
     
-    def chat_clear(e):
-        chat_area.controls.clear()
-        page.update()
+    
     chat_area = ft.Column(
         expand=True,
 
         scroll=ft.ScrollMode.AUTO,
         width=700
     )
-    
+    def chats_clear(e):
+        chat_area.controls.clear()
+        page.update()
     appbar = ft.AppBar(
     ft.IconButton(
     icon=ft.Icons.DELETE,
     icon_color=ft.Colors.RED,
     tooltip="Delete",
-    on_click=chat_clear
+    on_click=chats_clear
     ),
     center_title=True,
     bgcolor=ft.Colors.WHITE_10,
