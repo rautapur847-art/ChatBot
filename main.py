@@ -8,7 +8,7 @@ def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
     def chat_clear(e):
-        page.chat_area.controls.clear()
+        chat_area.controls.clear()
         page.update()
     page.appbar = ft.AppBar(
     ft.IconButton(
