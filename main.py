@@ -8,8 +8,8 @@ def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
  
-    def open_drawer(e):
-        page.show_drawer()
+    async def open_drawer(e):
+       await page.show_drawer()
         
         
         
@@ -20,9 +20,9 @@ def main(page:ft.Page):
         scroll=ft.ScrollMode.AUTO,
         width=700
     )
-    def chats_clear(e):
+    async def chats_clear(e):
         chat_area.controls.clear()
-        page.close_drawer()
+        await page.close_drawer()
         page.update()
       
     appbar = ft.AppBar(
