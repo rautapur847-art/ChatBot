@@ -29,7 +29,7 @@ def main(page:ft.Page):
     page.appbar = ft.AppBar(
     leading=ft.IconButton(
     icon=ft.Icons.MENU,
-    icon_color=ft.Colors.RED,
+    icon_color=ft.Colors.WHITE,
     tooltip="Delete",
     on_click=open_drawer
     ),
