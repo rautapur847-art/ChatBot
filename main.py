@@ -30,12 +30,17 @@ def main(page:ft.Page):
     leading=ft.IconButton(
     icon=ft.Icons.MENU,
     icon_color=ft.Colors.WHITE,
-    tooltip="Delete",
+    tooltip="menu",
     on_click=open_drawer
     ),
     center_title=True,
-    bgcolor=ft.Colors.WHITE_10,
-    title=ft.Text(
+    bgcolor=ft.Colors.BLACK,
+    
+    )
+    page.drawer = ft.NavigationDrawer(
+         controls=[
+             ft.ListTile(
+            title=ft.Text(
         spans=[
             ft.TextSpan(
                 "Chat",
@@ -46,10 +51,9 @@ def main(page:ft.Page):
                 style=ft.TextStyle(color="blue",weight=ft.FontWeight.BOLD)
             )
         ]
-    )
-    )
-    page.drawer = ft.NavigationDrawer(
-         controls=[
+            )
+         ),
+        ft.Divider(),
         ft.ListTile(
             title=ft.Text(
                 "Clear chat",
