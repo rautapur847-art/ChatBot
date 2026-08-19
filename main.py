@@ -60,7 +60,19 @@ def main(page:ft.Page):
                 color="red"
             ),
             on_click=chats_clear
-         )
+         ),
+        ft.Divider(),
+             ft.ListTile(
+                 title=ft.Text(
+                     "new",
+                     color="white"
+                 ),
+                 leading=ft.Icon(
+                     ft.Icons.CHAT,
+                     color="white"
+                 )
+             )
+                 
       ]
      )
     def show_msg(sender,massage):
