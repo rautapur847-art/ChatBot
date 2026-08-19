@@ -62,20 +62,21 @@ def main(page:ft.Page):
             on_click=chats_clear
          ),
         ft.Divider(),
-             ft.ListTile(
-                 title=ft.Text(
-                     "new",
-                     color="white"
-                 ),
-                 leading=ft.Icon(
-                     ft.Icons.CHAT,
-                     color="white"
-                 )
-             )
+          ft.ListTile(
+            title=ft.Text(
+                "new",
+                color="white"
+            ),
+            leading=ft.Icon(
+                ft.Icons.CHAT,
+                color="white"
+            ),
+          
+         )  
                  
       ]
      )
-    def show_msg(sender,massage):
+    def sho,massage):
      
      
         chat_area.controls.append(
