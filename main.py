@@ -33,7 +33,6 @@ def main(page:ft.Page):
     tooltip="menu",
     on_click=open_drawer
     ),
-    center_title=True,
     bgcolor=ft.Colors.BLACK,
     
     )
