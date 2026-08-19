@@ -79,7 +79,7 @@ def main(page:ft.Page):
                  
       ]
      )
-    def sho,massage):
+    def show_msg(sender,massage):
      
      
         chat_area.controls.append(
