@@ -40,6 +40,7 @@ def main(page:ft.Page):
          controls=[
              ft.ListTile(
             title=ft.Text(
+                size=24,
         spans=[
             ft.TextSpan(
                 "Chat",
@@ -50,8 +51,17 @@ def main(page:ft.Page):
                 style=ft.TextStyle(color="blue",weight=ft.FontWeight.BOLD)
             )
         ]
-            )
-         ),
+            ),
+                 leading=ft.Text(
+                "AI",
+                color="WHITE",
+                     size=24,
+            ),
+            ),
+                 
+         )
+         ]
+    ),
         ft.Divider(),
         ft.ListTile(
             title=ft.Text(
