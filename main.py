@@ -112,6 +112,7 @@ def main(page:ft.Page):
         show_msg("",user)    
         
         user_msg.value = ""
+        user_msg.label="Waiting....."
         user_msg.hint_text = "Thinking...."
         user_msg.disabled = True
         page.update()
