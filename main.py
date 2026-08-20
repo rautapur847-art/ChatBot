@@ -41,9 +41,9 @@ def main(page:ft.Page):
         ft.ListTile(
              title=ft.Icon(
                 ft.Icons.ASSISTANT,
-                 color="white",size=24
+                 color="white",size=60
              ),
-            min_leading_width=100,
+            min_leading_width=200,
             leading=ft.Text(
                 spans=[
                     ft.TextSpan(
