@@ -100,37 +100,75 @@ def main(page:ft.Page):
     ]
     )
     
-    def show_msg(sender,message):
-        
-    
-     
-     
-        chat_area.controls.append(
-            ft.Container(
+    # def show_msg(sender,message):
+    #     chat_area.controls.append(
+    #         ft.Container(
                
-                ft.Text(
+    #             ft.Text(
+    #                 spans=[
+    #                     ft.TextSpan(
+    #                         f"{sender}",
+    #                         style=ft.TextStyle(color="red",weight=ft.FontWeight.BOLD),
+    #                     ),
+    #                     ft.TextSpan(
+    #                        f"{message}",
+    #                        style=ft.TextStyle(color="white",weight=ft.FontWeight.BOLD)
+    #                     )
+    #                 ],
+    #                 selectable=True
+    #             ),
+    #             padding=0,
+    #             margin=5,
+    #             border_radius=5
+    #         )
+          
+    #   )
+    #     page.update()
+    def show_msg(sender, message):
+        is_user = sender == "You" or sender == "User"
+    
+    # मैसेज और डिवाइडर का कॉलम
+       msg_with_divider = ft.Column(
+        controls=[
+            # चैट मैसेज का मेन बॉक्स
+            ft.Container(
+                content=ft.Text(
                     spans=[
                         ft.TextSpan(
-                            f"{sender}",
-                            style=ft.TextStyle(color="red",weight=ft.FontWeight.BOLD),
+                            f"{sender}: ", 
+                            style=ft.TextStyle(
+                                # यूजर का नाम ग्रीन और दूसरे का रेड दिखेगा
+                                color="green" if is_user else "red", 
+                                weight=ft.FontWeight.BOLD
+                            ),
                         ),
                         ft.TextSpan(
-                           f"{message}",
-                           style=ft.TextStyle(color="white",weight=ft.FontWeight.BOLD)
+                            f"{message}",
+                            style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD)
                         )
                     ],
                     selectable=True
                 ),
-                padding=0,
-                margin=5,
-                border_radius=5
-            )
-            chat_area.controls.append(
-        ft.Divider(
-            height=1,
-            color=ft.Colors.WHITE_24
-        ))
-        page.update()
+                # यूजर के लिए गहरा ब्लैक (surface) और दूसरे के लिए नॉर्मल ब्लैक बॉक्स
+                bgcolor="#1A1A1A" if is_user else "black",
+                padding=12,
+                margin=ft.margin.only(bottom=5),
+                border_radius=8,
+                
+                # यूजर का बॉक्स दाएं (Right) और दूसरे का बाएं (Left) अलाइन करने के लिए
+                alignment=ft.alignment.center_right if is_user else ft.alignment.center_left,
+            ),
+            # बॉक्स के ठीक नीचे आने वाली डिवाइडर लाइन
+            ft.Divider(height=10, color="grey", thickness=1)
+        ],
+        spacing=2,
+        # पूरे कॉलम को स्क्रीन पर दाएं या बाएं खिसकाने के लिए
+        horizontal_alignment=ft.CrossAxisAlignment.END if is_user else ft.CrossAxisAlignment.START
+    )
+    
+    # इसे चैट एरिया में जोड़ें
+    chat_area.controls.append(msg_with_divider)
+    page.update()
     async def send_msg(e):
         user = user_msg.value.strip()
         if not user:
