@@ -101,6 +101,8 @@ def main(page:ft.Page):
     )
     
     def show_msg(sender,message):
+        
+    
      
      
         chat_area.controls.append(
@@ -123,8 +125,11 @@ def main(page:ft.Page):
                 margin=5,
                 border_radius=5
             )
-        )
-
+            chat_area.controls.append(
+        ft.Divider(
+            height=1,
+            color=ft.Colors.WHITE_24
+        ))
         page.update()
     async def send_msg(e):
         user = user_msg.value.strip()
