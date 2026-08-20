@@ -151,7 +151,7 @@ def main(page:ft.Page):
                     margin=5,                 # बॉक्स के बाहर जगह
                     border_radius=10,         # बॉक्स के कोने गोल
                     # यूजर का मैसेज दाईं तरफ (Right) और बाकी बाईं तरफ (Left)
-                    alignment=ft.alignment.center_right if is_user else ft.alignment.center_left,
+                   horizontal_alignment=ft.CrossAxisAlignment.END if is_user else ft.CrossAxisAlignment.START
                 ),
                 # हर एक चैट के बाद डिवाइडर लाइन
                 ft.Divider(height=1, color="grey", thickness=0.5)
