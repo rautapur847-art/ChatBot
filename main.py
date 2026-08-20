@@ -39,12 +39,12 @@ def main(page:ft.Page):
     page.drawer = ft.NavigationDrawer(
     controls=[
         ft.ListTile(
-             leading=ft.Icon(
+             title=ft.Icon(
                 ft.Icons.ASSISTANT,
                  color="white",size=24
              ),
-            min_leading_width=50,
-            title=ft.Text(
+            min_leading_width=100,
+            leading=ft.Text(
                 spans=[
                     ft.TextSpan(
                         "Chat",
@@ -71,9 +71,11 @@ def main(page:ft.Page):
         ft.ListTile(
             title=ft.Text(
                 "Clear chat",
-                color="red"
+                color="red",
+                weight=ft.FontWeight.BOLD
+                
             ),
-            min_leading_width=50,
+        
             leading=ft.Icon(
                 ft.Icons.DELETE,
                 color="red"
@@ -86,9 +88,10 @@ def main(page:ft.Page):
         ft.ListTile(
             title=ft.Text(
                 "New Chat",
-                color="white"
+                color="white",
+                weight=ft.FontWeight.BOLD
             ),
-            min_leading_width=50,
+        
             leading=ft.Icon(
                 ft.Icons.CHAT,
                 color="white"
