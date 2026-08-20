@@ -34,7 +34,7 @@ def main(page:ft.Page):
     tooltip="menu",
     on_click=open_drawer
     ),
-    bgcolor=ft.Colors.BLACK,
+    bgcolor=ft.Colors.TRANSPARENT,
     
     )
     page.drawer = ft.NavigationDrawer(
