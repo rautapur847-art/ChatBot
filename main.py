@@ -97,7 +97,7 @@ def main(page:ft.Page):
     ]
     )
     
-    def show_msg(sender,massage):
+    def show_msg(sender,message):
      
      
         chat_area.controls.append(
@@ -110,7 +110,7 @@ def main(page:ft.Page):
                             style=ft.TextStyle(color="red",weight=ft.FontWeight.BOLD),
                         ),
                         ft.TextSpan(
-                           f"{massage}",
+                           f"{message}",
                            style=ft.TextStyle(color="white",weight=ft.FontWeight.BOLD)
                         )
                     ],
@@ -130,22 +130,25 @@ def main(page:ft.Page):
         show_msg("",user)    
         
         user_msg.value = ""
-        user_msg.label="Waiting....."
-        user_msg.hint_text = "Thinking...."
+    
+        user_msg.hint_text = "Thinking..."
         user_msg.disabled = True
+        user_msg.hint_style=ft.TextStyle(color="blue")
         page.update()
         try:
             response = await asyncio.to_thread(model.generate_content,user)
             show_msg("",response.text)
         except Exception as e:
-            show_msg("Error",e) 
+            show_msg("Error",str(e)) 
         finally:
-            user_msg.hint_text = "Ask anything...."
+            user_msg.hint_text = "Ask anything..."
+            user_msg.hint_style = ft.TextStyle(color="white")
             user_msg.disabled=False
             page.update()     
 
     user_msg = ft.TextField(
         hint_text="Ask anything...",
+        hint_style=ft.TextStyle(color="white"),
         value="",
         autofocus=True,
         expand=True,
