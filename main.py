@@ -37,32 +37,37 @@ def main(page:ft.Page):
     
     )
     page.drawer = ft.NavigationDrawer(
-         controls=[
-             ft.ListTile(
+    controls=[
+        ft.ListTile(
             title=ft.Text(
-                size=24,
-        spans=[
-            ft.TextSpan(
-                "Chat",
-                style=ft.TextStyle(color="red",weight=ft.FontWeight.BOLD)
+                spans=[
+                    ft.TextSpan(
+                        "Chat",
+                        style=ft.TextStyle(
+                            color="red",
+                            weight=ft.FontWeight.BOLD,
+                            size=24
+                        )
+                    ),
+                    ft.TextSpan(
+                        "Bot",
+                        style=ft.TextStyle(
+                            color="blue",
+                            weight=ft.FontWeight.BOLD,
+                            size=24
+                        )
+                    )
+                ]
             ),
-            ft.TextSpan(
-                "Bot",
-                style=ft.TextStyle(color="blue",weight=ft.FontWeight.BOLD)
-            )
-        ]
-            ),
-                 leading=ft.Text(
+            leading=ft.Text(
                 "AI",
-                color="WHITE",
-                     size=24,
-            ),
-            ),
-                 
-         )
-         ]
-    ),
+                color="white",
+                size=24
+            )
+        ),
+
         ft.Divider(),
+
         ft.ListTile(
             title=ft.Text(
                 "Clear chat",
@@ -73,22 +78,23 @@ def main(page:ft.Page):
                 color="red"
             ),
             on_click=chats_clear
-         ),
+        ),
+
         ft.Divider(),
-          ft.ListTile(
+
+        ft.ListTile(
             title=ft.Text(
-                "new",
+                "New Chat",
                 color="white"
             ),
             leading=ft.Icon(
                 ft.Icons.CHAT,
                 color="white"
-            ),
-          
-         )  
-                 
-      ]
-     )
+            )
+        )
+    ]
+    )
+    
     def show_msg(sender,massage):
      
      
