@@ -7,6 +7,7 @@ model = gn.GenerativeModel("gemini-3.6-flash")
 def main(page:ft.Page):
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
+    page.theme_mode= ft.ThemeMode.DARK
  
     async def open_drawer(e):
      await page.show_drawer()
@@ -33,7 +34,7 @@ def main(page:ft.Page):
     tooltip="menu",
     on_click=open_drawer
     ),
-    bgcolor=ft.Colors.BLACK_12,
+    bgcolor=ft.Colors.BLACK,
     
     )
     page.drawer = ft.NavigationDrawer(
