@@ -35,7 +35,7 @@ def main(page:ft.Page):
     on_click=open_drawer
     ),
     bgcolor=ft.Colors.TRANSPARENT,
-    
+    elevation=0,
     )
     page.drawer = ft.NavigationDrawer(
     controls=[
