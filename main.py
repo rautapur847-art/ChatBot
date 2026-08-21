@@ -41,8 +41,9 @@ def main(page:ft.Page):
     controls=[
         ft.ListTile(
              title=ft.Icon(
-                ft.Icons.ASSISTANT,
-                 color="white",size=60
+                ft.Icons.PERSON,
+                 color="white",size=60,
+                 
              ),
             min_leading_width=200,
             leading=ft.Text(
