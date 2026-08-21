@@ -34,6 +34,19 @@ def main(page:ft.Page):
     tooltip="menu",
     on_click=open_drawer
     ),
+     actions=[
+        ft.IconButton(
+            icon=ft.Icons.EDIT,
+            icon_color=ft.Colors.WHITE,
+            tooltip="New Chat"
+        ),
+
+        ft.IconButton(
+            icon=ft.Icons.ADD,
+            icon_color=ft.Colors.WHITE,
+            tooltip="add"
+        )
+    ],   
     bgcolor=ft.Colors.TRANSPARENT,
     elevation=0,
     )
