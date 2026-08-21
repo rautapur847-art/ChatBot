@@ -172,15 +172,25 @@ def main(page:ft.Page):
         align=ft.Alignment.BOTTOM_CENTER,
         on_submit=send_msg,
         
-        suffix=ft.IconButton(
+        suffix=ft.Row(
+            controls=[
+        ft.IconButton(
             icon=ft.Icons.SEND_OUTLINED,
             icon_color="blue",
-            # bgcolor="blue",
             on_click=send_msg,
             tooltip="Send..."
+        
             
         ),
-        
+            ft.IconButton(
+            icon=ft.Icons.MIC,
+            icon_color="blue",        
+            tooltip="Voice"
+                
+            ],
+            tight=True,
+            spacing=0
+        )
         height=60,
         margin=5,
         border_color=ft.Colors.WHITE_24,
