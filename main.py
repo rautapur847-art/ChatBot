@@ -32,19 +32,24 @@ def main(page:ft.Page):
     icon=ft.Icons.MENU,
     icon_color=ft.Colors.WHITE,
     tooltip="menu",
-    on_click=open_drawer
+    on_click=open_drawer,
+    bgcolor="grey"
+
     ),
      actions=[
         ft.IconButton(
             icon=ft.Icons.EDIT,
             icon_color=ft.Colors.WHITE,
-            tooltip="New Chat"
+            tooltip="New Chat",
+            bgcolor="grey"
         ),
 
         ft.IconButton(
             icon=ft.Icons.ADD,
             icon_color=ft.Colors.WHITE,
-            tooltip="add"
+            tooltip="add",
+            bgcolor="grey"
+            
         )
     ],   
     bgcolor=ft.Colors.TRANSPARENT,
