@@ -169,7 +169,7 @@ def main(page:ft.Page):
             page.update()     
 
     user_msg = ft.TextField(
-        hint_text="Ask anything...",
+                hint_text="Ask anything...",
         hint_style=ft.TextStyle(color="white"),
         value="",
         autofocus=True,
@@ -191,19 +191,24 @@ def main(page:ft.Page):
             icon=ft.Icons.MIC,
             icon_color="blue",        
             tooltip="Voice"
+            )
                 
             ],
             tight=True,
             spacing=0
-        )
+        ),
         height=60,
         margin=5,
         border_color=ft.Colors.WHITE_24,
         width=500,
         border_radius=20,
         color="white"
-   
+
+
     )
+        
+    
+
     page.add(
        
         chat_area,
