@@ -33,7 +33,7 @@ def main(page:ft.Page):
     icon_color=ft.Colors.WHITE,
     tooltip="menu",
     on_click=open_drawer,
-    bgcolor="grey"
+    
 
     ),
      actions=[
@@ -41,14 +41,14 @@ def main(page:ft.Page):
             icon=ft.Icons.EDIT,
             icon_color=ft.Colors.WHITE,
             tooltip="New Chat",
-            bgcolor="grey"
+        
         ),
 
         ft.IconButton(
             icon=ft.Icons.ADD,
             icon_color=ft.Colors.WHITE,
             tooltip="add",
-            bgcolor="grey"
+            
             
         )
     ],   
@@ -179,6 +179,12 @@ def main(page:ft.Page):
         
         suffix=ft.Row(
             controls=[
+                ft.IconButton(
+            icon=ft.Icons.MIC,
+            icon_color="blue",        
+            tooltip="Voice"
+            ),
+            
         ft.IconButton(
             icon=ft.Icons.SEND_OUTLINED,
             icon_color="blue",
@@ -187,11 +193,6 @@ def main(page:ft.Page):
         
             
         ),
-            ft.IconButton(
-            icon=ft.Icons.MIC,
-            icon_color="blue",        
-            tooltip="Voice"
-            )
                 
             ],
             tight=True,
