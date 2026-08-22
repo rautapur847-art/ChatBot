@@ -5,6 +5,8 @@ import google.generativeai as gn
 gn.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = gn.GenerativeModel("gemini-3.6-flash")
 def main(page:ft.Page):
+    page.clean()
+    from add_dialog import open_add_dialog
     page.horizontal_alignment=ft.MainAxisAlignment.CENTER
     page.vertical_alignment=ft.CrossAxisAlignment.CENTER
     page.theme_mode= ft.ThemeMode.DARK
@@ -48,7 +50,7 @@ def main(page:ft.Page):
             icon=ft.Icons.ADD,
             icon_color=ft.Colors.WHITE,
             tooltip="add",
-            
+            on_click=lambda e: open_add_dialog(page),
             
         )
     ],   
