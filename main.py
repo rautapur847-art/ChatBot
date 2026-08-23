@@ -27,4 +27,4 @@ async def main(page: ft.Page):
     page.update()
 
 # modern Flet 1.0 run command
-ft.run(main)
+ft.run(main,view=ft.AppView.WEB_BROWSER)
