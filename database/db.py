@@ -104,3 +104,27 @@ class ChatBotDatabase:
         sql = "SELECT * FROM ai_chat_logs WHERE id = %s AND user_id = %s"
         self.cur.execute(sql, (chat_id, user_id))
         return self.cur.fetchone()
+
+    # ---------------------------------------------------------------
+    # Google sign-in support
+    # ---------------------------------------------------------------
+
+    def get_user_by_email(self, email):
+        """Used for Google sign-in: check if this email already has an
+        account (created via normal registration or a previous Google
+        login)."""
+        sql = """SELECT user_id, name, email, mobile, password FROM users WHERE email=%s"""
+        self.cur.execute(sql, (email,))
+        return self.cur.fetchone()
+
+    def register_google_user(self, name, email):
+        """Creates a user for someone signing in with Google for the first
+        time. They'll never actually use the password (they always sign
+        in via Google), so a random placeholder is stored just to satisfy
+        the NOT NULL column — never shown to or usable by the user."""
+        import secrets
+        placeholder_password = secrets.token_hex(16)
+        sql = """INSERT INTO users(name, email, mobile, password) VALUES (%s, %s, %s, %s)"""
+        self.cur.execute(sql, (name, email, "", placeholder_password))
+        self.conn.commit()
+        return self.cur.lastrowid
