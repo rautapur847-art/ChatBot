@@ -53,7 +53,6 @@ def LoginScreen(page: ft.Page):
                 print("User ID:", user_id)
                 print("User Name:", name)
                 
-                # 🌟 सटीक सुधार 1: कोरूटीन अन-अवेटेड एरर को खत्म करने के लिए पूर्ण एसिंक सेविंग
                 storage = getattr(page, "shared_preferences", getattr(page, "client_storage", None))
                 if storage is not None:
                     try:
@@ -67,7 +66,6 @@ def LoginScreen(page: ft.Page):
                 
                 page.controls.clear()
                 
-                # 🌟 सटीक सुधार 2: HomeScreen को सुरक्षित रूप से अवेट (Await) करना
                 if inspect.iscoroutinefunction(HomeScreen):
                     await HomeScreen(page, int(user_id), name)
                 else:
@@ -79,22 +77,18 @@ def LoginScreen(page: ft.Page):
                     await page.update_async()
                 else:
                     page.update()
-            elif password.value != password_value:
-                message.value = "Invalid password...."
-                message.color = "red"
-                page.update() 
-            elif email.value!=email_value:
-                message.value = "Invalid Email..."
-                message.color = "red"
-                page.update() 
-        
-                
-                
+
             else:
-                message.value = "Invalid email and password"
+                # NOTE: the login query (email=%s AND password=%s) can't
+                # tell us whether the email doesn't exist or the password
+                # is wrong — only that the combination didn't match. A
+                # single generic message here is both correct and safer
+                # (not confirming to an attacker whether an email is
+                # registered).
+                message.value = "Invalid email or password."
                 message.color = "red"
-                page.update()  
-                
+                page.update()
+
         except Exception as ex:
             message.value = f"Login error: {ex}"
             message.color = "red"
@@ -124,3 +118,4 @@ def LoginScreen(page: ft.Page):
     )
     
     page.update()
+        
