@@ -599,12 +599,12 @@ async def HomeScreen(page: ft.Page, user_id, name):
 
                    ft.Container(
                      expand=True,
-                       content=ft.Column(
+                       
                       controls=[history_sidebar.view],
-                     scroll=ft.ScrollMode.AUTO,
-                      expand=True,
+                     
+                    
                       ),
-                    ),
+                
 
                 
                     ft.Divider(),
