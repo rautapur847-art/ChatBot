@@ -1,4 +1,4 @@
-﻿flet
+flet
 flet-audio-recorder
 flet-camera
 flet-cli
@@ -16,10 +16,3 @@ mysql-connector-python
 fastapi
 uvicorn
 opencv-python-headless
-portaudio19-dev
-libgl1-mesa-glx
-libglib2.0-0
-
-
-
-
