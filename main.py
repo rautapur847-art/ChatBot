@@ -11,15 +11,12 @@ async def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
-    # 🌟 बिल्कुल सटीक सुधार: Flet 1.0 के अनुसार Standalone SharedPreferences सर्विस बनाई
-    prefs = ft.SharedPreferences()
+    # 🌟 सुधार: SharedPreferences की जगह सर्वर-फ्रेंडली client_storage का उपयोग करें
+    user_logged_in = await page.client_storage.get_async("is_logged_in")
     
-    # Flet 1.0 में get_async नहीं, बल्कि सीधे await prefs.get() होता है
-    user_logged_in = await prefs.get("is_logged_in")
-    
-    if user_logged_in == "true": # SharedPreferences हमेशा String स्टोर करता है
-        user_id = await prefs.get("user_id")
-        name = await prefs.get("name")
+    if user_logged_in == "true": 
+        user_id = await page.client_storage.get_async("user_id")
+        name = await page.client_storage.get_async("name")
         HomeScreen(page, int(user_id), name)
     else:
         LoginScreen(page)
@@ -27,4 +24,4 @@ async def main(page: ft.Page):
     page.update()
 
 # modern Flet 1.0 run command
-ft.run(main,view=ft.AppView.WEB_BROWSER)
+ft.run(main, view=ft.AppView.WEB_BROWSER)
