@@ -28,7 +28,7 @@ _BLANK_PIXEL = (
 )
 
 
-def HomeScreen(page: ft.Page,user_id,name):
+async def HomeScreen(page: ft.Page,user_id,name):
     page.clean()
     from database.db import ChatBotDatabase
     from screens.chat_history import ChatHistory 
@@ -756,4 +756,5 @@ def HomeScreen(page: ft.Page,user_id,name):
         attachment_container,
         ft.Row([user_msg]),
     )
+    page.add(main_layout)
     page.update()
