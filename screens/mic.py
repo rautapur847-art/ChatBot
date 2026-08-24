@@ -1,9 +1,23 @@
 import flet as ft
-import sounddevice as sd
 import numpy as np
 import speech_recognition as sr
 import threading
 import time
+
+# `sounddevice` needs the system PortAudio library to even import. On a
+# machine that has it (Windows desktop, most dev machines) this works
+# fine. On a headless cloud server (e.g. Render) it's usually missing —
+# and more fundamentally, server-side mic capture can't work correctly
+# for a hosted multi-user web app anyway (it would try to record from
+# the SERVER's microphone, not each visitor's own device). So this import
+# is wrapped defensively: if it fails, the mic button still exists, it
+# just reports "not available" instead of crashing the whole screen.
+try:
+    import sounddevice as sd
+    SOUNDDEVICE_AVAILABLE = True
+except OSError:
+    sd = None
+    SOUNDDEVICE_AVAILABLE = False
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
@@ -53,6 +67,12 @@ class MicScreen:
         self.on_recording_change = on_recording_change or (lambda is_recording: None)
 
     def toggle_mic(self, e):
+        if not SOUNDDEVICE_AVAILABLE:
+            self.on_status(
+                "Voice input isn't available on this deployment (no server microphone).",
+                "red",
+            )
+            return
         if not self.is_recording:
             self.start_recording()
         else:
