@@ -53,27 +53,28 @@ def LoginScreen(page: ft.Page):
                 print("User ID:", user_id)
                 print("User Name:", name)
                 
-                # 🌟 सुधार 1: टाइमआउट से बचने के लिए यूनिवर्सल 'shared_preferences' या 'client_storage' का उपयोग
+                # 🌟 सटीक सुधार 1: कोरूटीन अन-अवेटेड एरर को खत्म करने के लिए पूर्ण एसिंक सेविंग
                 storage = getattr(page, "shared_preferences", getattr(page, "client_storage", None))
                 if storage is not None:
-                    if hasattr(storage, "set_async"):
+                    try:
                         await storage.set_async("is_logged_in", "true")
                         await storage.set_async("user_id", str(user_id))
                         await storage.set_async("name", str(name))
-                    else:
-                        storage.set("is_logged_in", "true")
-                        storage.set("user_id", str(user_id))
-                        storage.set("name", str(name))
+                    except Exception:
+                        await storage.set("is_logged_in", "true")
+                        await storage.set("user_id", str(user_id))
+                        await storage.set("name", str(name))
                 
-                # 🌟 सुधार 2: स्क्रीन कंट्रोल्स साफ़ करें और होम स्क्रीन को सुरक्षित रूप से कॉल करें
                 page.controls.clear()
                 
+                # 🌟 सटीक सुधार 2: HomeScreen को सुरक्षित रूप से अवेट (Await) करना
                 if inspect.iscoroutinefunction(HomeScreen):
                     await HomeScreen(page, int(user_id), name)
                 else:
-                    HomeScreen(page, int(user_id), name)
+                    res = HomeScreen(page, int(user_id), name)
+                    if inspect.iscoroutine(res):
+                        await res
                 
-                # स्क्रीन को सुरक्षित अपडेट करें
                 if hasattr(page, "update_async"):
                     await page.update_async()
                 else:
