@@ -241,9 +241,11 @@ async def HomeScreen(page: ft.Page, user_id, name):
         leading=ft.Icon(ft.Icons.CAMERA_ALT, color="blue"),
     )
 
-    def handle_camera_click(e):
-        set_status("Opening camera...", "blue")
-        camera_screen.open_camera(e)
+    async def handle_camera_click(e):
+        # open_camera itself reports status now (it needs to open the
+        # dialog before it can even check for a camera), so it handles
+        # "Opening camera..." / errors on its own.
+        await camera_screen.open_camera(e)
 
     camera_tile.on_click = handle_camera_click
 
