@@ -2,6 +2,7 @@ import flet as ft
 from database.db import ChatBotDatabase
 import asyncio
 import inspect
+import random
 
 def LoginScreen(page: ft.Page):
     from screens.register import Register
@@ -26,6 +27,27 @@ def LoginScreen(page: ft.Page):
         prefix_icon=ft.Icons.LOCK,
         password=True
     )
+
+    # ---- simple math CAPTCHA (no external service/dependency needed) ----
+    captcha_state = {"a": 0, "b": 0}
+
+    captcha_label = ft.Text("", color="white", weight=ft.FontWeight.BOLD)
+    captcha_answer = ft.TextField(
+        hint_text="Your answer...",
+        label=" CAPTCHA answer...",
+        width=320,
+        prefix_icon=ft.Icons.SHIELD_OUTLINED,
+    )
+
+    def refresh_captcha():
+        # New numbers each time — so a wrong/expired attempt can't just be
+        # retried against the same known answer.
+        captcha_state["a"] = random.randint(1, 9)
+        captcha_state["b"] = random.randint(1, 9)
+        captcha_label.value = f"Solve to continue: {captcha_state['a']} + {captcha_state['b']} = ?"
+        captcha_answer.value = ""
+
+    refresh_captcha()
     
     message = ft.Text(
         "",
@@ -40,6 +62,20 @@ def LoginScreen(page: ft.Page):
         if not email_value or not password_value:
             message.value = "Please enter email and password.."
             message.color = "red"
+            page.update()
+            return
+
+        # ---- CAPTCHA check, before ever touching the database ----
+        expected = captcha_state["a"] + captcha_state["b"]
+        try:
+            entered = int(captcha_answer.value.strip())
+        except (TypeError, ValueError):
+            entered = None
+
+        if entered != expected:
+            message.value = "Incorrect CAPTCHA answer — try again."
+            message.color = "red"
+            refresh_captcha()
             page.update()
             return
             
@@ -87,6 +123,7 @@ def LoginScreen(page: ft.Page):
                 # registered).
                 message.value = "Invalid email or password."
                 message.color = "red"
+                refresh_captcha()
                 page.update()
 
         except Exception as ex:
@@ -100,7 +137,9 @@ def LoginScreen(page: ft.Page):
             [
                ft.Icon(ft.Icons.PERSON, size=90, color="blue"),
                ft.Text("login to continue.", color="white", font_family="arial"),
-               email, password, message,
+               email, password,
+               captcha_label, captcha_answer,
+               message,
                ft.OutlinedButton(
                     "Login.",
                     width=320,
@@ -118,4 +157,3 @@ def LoginScreen(page: ft.Page):
     )
     
     page.update()
-        
