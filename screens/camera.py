@@ -67,21 +67,39 @@ class CameraScreen:
     def open_camera(self, e):
         self.on_status("Opening camera...", "blue")
 
-        self.page.show_dialog(self.camera_dialog)
-        self.is_streaming = True
+        # NOTE: we used to open the dialog immediately and only then check
+        # whether the camera actually exists — if it didn't (as on any
+        # hosted --web deployment, where this Python code runs on the
+        # SERVER, which has no physical camera), the dialog got opened and
+        # immediately popped again. That round-trip could leave Flet's
+        # dialog-stack state out of sync, causing a LATER attempt to open
+        # any dialog to fail with "Dialog is already opened". Now we
+        # probe the camera first, in the background, and only touch the
+        # dialog at all if it actually opened successfully.
+        threading.Thread(target=self._probe_and_stream, daemon=True).start()
 
-        # Run the blocking OpenCV loop in a background thread so it never
-        # blocks Flet's websocket / event loop.
-        threading.Thread(target=self._stream_camera, daemon=True).start()
-
-    def _stream_camera(self):
+    def _probe_and_stream(self):
         self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
         if not self.cap.isOpened():
             self.on_status("Camera hardware not found!", "red")
-            self.close_camera_popup()
+            self.cap = None
+            return  # dialog was never opened — nothing to clean up
+
+        self.is_streaming = True
+        try:
+            self.page.show_dialog(self.camera_dialog)
+        except Exception as ex:
+            # Something's already open/out of sync — don't crash the app.
+            self.on_status(f"Couldn't open camera popup: {ex}", "red")
+            self.is_streaming = False
+            self.cap.release()
+            self.cap = None
             return
 
+        self._stream_camera()
+
+    def _stream_camera(self):
         # Keep the capture device itself at a small resolution so we're not
         # reading (and then downscaling) huge frames every loop.
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
@@ -158,10 +176,15 @@ class CameraScreen:
         # never use cv2.imshow anyway; frames are sent to the Flet UI as
         # base64, not shown in a native OpenCV window), so calling it
         # crashes with "The function is not implemented."
-        if self.camera_dialog.open:
-            self.page.pop_dialog()
-        else:
-            self.page.update()
+        try:
+            if self.camera_dialog.open:
+                self.page.pop_dialog()
+            else:
+                self.page.update()
+        except Exception as ex:
+            # Dialog state got out of sync somehow — don't let that crash
+            # the whole app, just log it and move on.
+            print(f"CameraScreen.close_camera_popup: {ex}")
 
     def on_dialog_close(self, e):
         # Fires if the user dismisses the popup by tapping outside it.
@@ -169,4 +192,3 @@ class CameraScreen:
         if self.cap:
             self.cap.release()
             self.cap = None
-        
