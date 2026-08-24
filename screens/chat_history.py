@@ -40,7 +40,7 @@ class ChatHistory:
             expand=True,
             margin=10,
             scroll=ft.ScrollMode.AUTO,
-            expand=True,
+            
             
         )
 
