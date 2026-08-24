@@ -600,7 +600,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
                    ft.Container(
                      expand=True,
                        
-                      controls=[history_sidebar.view],
+                      content=history_sidebar.view,
                      
                     
                       ),
