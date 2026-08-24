@@ -5,16 +5,20 @@ flet-cli
 flet-desktop
 flet-video
 flet-web
+
 google-generativeai
 google-genai
+
 SpeechRecognition
-sounddevice
 numpy
 Pillow
 python-dotenv
+
 mysql-connector-python
+
 fastapi
 uvicorn
-opencv-python-headless
-resend
 
+opencv-python-headless
+
+resend
