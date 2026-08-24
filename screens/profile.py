@@ -15,6 +15,8 @@ def ProfileScreen(page: ft.Page, user_id, user_name=None):
     from screens.home import HomeScreen
 
     page.theme_mode = ft.ThemeMode.DARK
+    async def go_home(e):
+        await HomeScreen(page, user_id, user.get("name", user_name))
 
     db = ChatBotDatabase()
     user = db.get_users_by_id(user_id) or {}
@@ -23,7 +25,7 @@ def ProfileScreen(page: ft.Page, user_id, user_name=None):
         leading=ft.IconButton(
             ft.Icons.ARROW_BACK,
             tooltip="Home",
-            on_click=lambda e: HomeScreen(page, user_id, user.get("name", user_name)),
+            on_click=go_home
         ),
         title=ft.Text("Profile", color="white", weight=ft.FontWeight.BOLD),
         center_title=True,
