@@ -758,5 +758,6 @@ async def HomeScreen(page: ft.Page,user_id,name):
     )
         # 🌟 बिल्कुल सटीक सुधार: Async एनवायरनमेंट के लिए सही अपडेट कमांड्स
     page.add(main_layout)
-    await page.update_async()
+    page.update()
+
 
