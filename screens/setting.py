@@ -15,7 +15,7 @@ def SettingScreen(page: ft.Page,user_id,name):
         leading=ft.IconButton(
             ft.Icons.ARROW_BACK,
             tooltip="Home",
-            on_click=lambda e: HomeScreen(page,user_id,name),
+            on_click=lambda e: HomeScreen(page,user_id,name)
         ),
         title=ft.Text("Settings", color="white", weight=ft.FontWeight.BOLD),
         center_title=True,
