@@ -1,16 +1,15 @@
 import flet as ft 
 from database.db import ChatBotDatabase
 import asyncio
+import inspect
 
 def LoginScreen(page: ft.Page):
-
     from screens.register import Register
     from screens.home import HomeScreen
     page.clean()
     
     page.appbar = None
     page.drawer = None
-    
     
     email = ft.TextField(
         hint_text=" Enter your email...",
@@ -54,16 +53,31 @@ def LoginScreen(page: ft.Page):
                 print("User ID:", user_id)
                 print("User Name:", name)
                 
-                # 🌟 सुधार 1: Flet 1.0 स्टैंडअलोन SharedPreferences में डेटा सुरक्षित सेव किया
-                prefs = ft.SharedPreferences()
-                await prefs.set("is_logged_in", "true")
-                await prefs.set("user_id", str(user_id))
-                await prefs.set("name", str(name))
+                # 🌟 सुधार 1: टाइमआउट से बचने के लिए यूनिवर्सल 'shared_preferences' या 'client_storage' का उपयोग
+                storage = getattr(page, "shared_preferences", getattr(page, "client_storage", None))
+                if storage is not None:
+                    if hasattr(storage, "set_async"):
+                        await storage.set_async("is_logged_in", "true")
+                        await storage.set_async("user_id", str(user_id))
+                        await storage.set_async("name", str(name))
+                    else:
+                        storage.set("is_logged_in", "true")
+                        storage.set("user_id", str(user_id))
+                        storage.set("name", str(name))
                 
-                async def launch_home():
-                    HomeScreen(page, user_id, name)
-                # 🌟 सुधार 2: डार्क स्क्रीन बग फिक्स! होमपेज को बैकग्राउंड थ्रेड से स्क्रीन पर रेंडर करने के लिए run_task का उपयोग किया
-                page.run_task(launch_home)
+                # 🌟 सुधार 2: स्क्रीन कंट्रोल्स साफ़ करें और होम स्क्रीन को सुरक्षित रूप से कॉल करें
+                page.controls.clear()
+                
+                if inspect.iscoroutinefunction(HomeScreen):
+                    await HomeScreen(page, int(user_id), name)
+                else:
+                    HomeScreen(page, int(user_id), name)
+                
+                # स्क्रीन को सुरक्षित अपडेट करें
+                if hasattr(page, "update_async"):
+                    await page.update_async()
+                else:
+                    page.update()
             else:
                 message.value = "Invalid email and password"
                 message.color = "red"
@@ -71,7 +85,7 @@ def LoginScreen(page: ft.Page):
         except Exception as ex:
             message.value = f"Login error: {ex}"
             message.color = "red"
-            message.selectable=True
+            message.selectable = True
             page.update()          
                 
     page.add( 
