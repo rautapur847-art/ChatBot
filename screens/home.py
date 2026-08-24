@@ -601,7 +601,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
 
                     ft.Container(
                         expand=True,
-                        scroll=ft.ScrollMode.AUTO,
+                        
                     ),
                     ft.Divider(),
                     ft.ListTile(
