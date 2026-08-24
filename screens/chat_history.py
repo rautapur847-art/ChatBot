@@ -38,7 +38,10 @@ class ChatHistory:
             ],
             spacing=5,
             expand=True,
-            margin=10
+            margin=10,
+            scroll=ft.ScrollMode.AUTO,
+            expand=True,
+            
         )
 
         self.load_history()
