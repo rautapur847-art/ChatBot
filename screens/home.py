@@ -273,10 +273,13 @@ async def HomeScreen(page: ft.Page, user_id, name):
     )
 
     def close_dialog(e):
-        if dialog.open:
-            page.pop_dialog()
-        else:
-            page.update()
+        try:
+            if dialog.open:
+                page.pop_dialog()
+            else:
+                page.update()
+        except Exception as ex:
+            print(f"close_dialog: {ex}")
 
     dialog = ft.AlertDialog(
         title=ft.Row(
@@ -309,7 +312,13 @@ async def HomeScreen(page: ft.Page, user_id, name):
         upload_status.value = ""
         if not user_msg.disabled:
             upload_progress.value = 0
-        page.show_dialog(dialog)
+        try:
+            page.show_dialog(dialog)
+        except Exception as ex:
+            # Guards against rapid double-taps trying to open the dialog
+            # twice, or the dialog stack being briefly out of sync.
+            print(f"open_upload_popup: {ex}")
+            page.update()
 
     chat_area = ft.Column(
         expand=True,
