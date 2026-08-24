@@ -4,7 +4,6 @@ import speech_recognition as sr
 import asyncio
 import threading
 import time
-import numpy as np
 
 
 # ============================================================
@@ -13,19 +12,13 @@ import numpy as np
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
-BYTES_PER_SAMPLE = 2
+SAMPLE_WIDTH = 2
 
-# Kitni der silence hone par mic automatically stop hoga
+# Itni der tak audio na aaye to recording stop
 SILENCE_SECONDS = 1.2
 
-# Maximum recording time
+# Maximum recording duration
 MAX_RECORD_SECONDS = 30
-
-# Speech detection
-RMS_THRESHOLD = 350
-
-# Har kitne seconds ke audio ko transcription ke liye bhejna hai
-TRANSCRIBE_INTERVAL = 1.5
 
 
 class MicScreen:
@@ -46,99 +39,81 @@ class MicScreen:
 
         self.on_status = (
             on_status
-            or (lambda text, color="white": None)
+            if on_status
+            else lambda text, color="white": None
         )
 
         self.on_result = (
             on_result
-            or (lambda text: None)
+            if on_result
+            else lambda text: None
         )
 
         self.on_recording_change = (
             on_recording_change
-            or (lambda recording: None)
+            if on_recording_change
+            else lambda is_recording: None
         )
 
         # ----------------------------------------------------
-        # Speech recognizer
+        # Speech Recognition
         # ----------------------------------------------------
 
         self.recognizer = sr.Recognizer()
 
-        # ----------------------------------------------------
-        # Audio recorder
-        # ----------------------------------------------------
+        # ====================================================
+        # IMPORTANT:
+        # on_state_change intentionally NOT used.
+        #
+        # This prevents:
+        # 'MicScreen' object has no attribute '_on_state_change'
+        # ====================================================
 
         self.recorder = far.AudioRecorder(
             on_stream=self._on_audio_stream,
-            on_state_change=self._on_state_change,
         )
 
         # ----------------------------------------------------
-        # State
+        # Recording state
         # ----------------------------------------------------
 
         self.is_recording = False
-
-        self.speech_started = False
-
-        self.last_voice_time = 0.0
-
-        self.record_start_time = 0.0
-
-        # All received PCM audio
-        self.audio_buffer = bytearray()
-
-        # Audio waiting for transcription
-        self.transcription_buffer = bytearray()
-
-        # Final text
-        self.final_text = ""
-
-        # Prevent multiple transcription jobs
-        self.transcribing = False
-
-        # Prevent multiple stop calls
         self.stop_in_progress = False
 
-        # Lock for audio buffers
+        self.record_start_time = 0
+        self.last_audio_time = 0
+
+        # ----------------------------------------------------
+        # Audio data
+        # ----------------------------------------------------
+
+        self.frames = []
+
         self.lock = threading.Lock()
 
-        # Last transcription time
-        self.last_transcription_time = 0.0
+        # ----------------------------------------------------
+        # Background task
+        # ----------------------------------------------------
 
-        # Async watcher task
-        self.watch_task = None
+        self.silence_task = None
 
 
-    # ============================================================
+    # ========================================================
     # MIC BUTTON
-    # ============================================================
+    # ========================================================
 
     def toggle_mic(self, e):
 
-        # Flet event handler can launch coroutine
-        self.page.run_task(
-            self._toggle_mic
-        )
-
-
-    async def _toggle_mic(self):
-
         try:
 
-            if self.is_recording:
-
-                await self.stop_recording()
-
-            else:
-
-                await self.start_recording()
+            self.page.run_task(
+                self._toggle_mic
+            )
 
         except Exception as ex:
 
             print(
-                "Mic toggle error:",
+                "Toggle microphone error:",
                 ex
             )
 
@@ -148,18 +123,29 @@ class MicScreen:
             )
 
 
-    # ============================================================
-    # START RECORDING
-    # ============================================================
-
-    async def start_recording(self):
+    async def _toggle_mic(self):
 
         if self.is_recording:
 
+            await self.stop_recording()
+
+        else:
+
+            await self.start_recording()
+
+
+    # ========================================================
+    # START RECORDING
+    # ========================================================
+
+    async def start_recording(self):
+
+        # Already recording
+        if self.is_recording:
             return
 
+        # Previous stop still running
         if self.stop_in_progress:
-
             return
 
         try:
@@ -168,9 +154,7 @@ class MicScreen:
             # Microphone permission
             # ------------------------------------------------
 
-            permission = (
-                await self.recorder.has_permission()
-            )
+            permission = await self.recorder.has_permission()
 
             if not permission:
 
@@ -181,34 +165,22 @@ class MicScreen:
 
                 return
 
-
             # ------------------------------------------------
-            # Reset everything
+            # Reset old recording
             # ------------------------------------------------
 
             with self.lock:
 
-                self.audio_buffer = bytearray()
-
-                self.transcription_buffer = bytearray()
-
-            self.final_text = ""
-
-            self.speech_started = False
-
-            self.transcribing = False
-
-            self.stop_in_progress = False
+                self.frames.clear()
 
             self.record_start_time = time.time()
 
-            self.last_voice_time = time.time()
+            self.last_audio_time = time.time()
 
-            self.last_transcription_time = time.time()
-
+            self.stop_in_progress = False
 
             # ------------------------------------------------
-            # Recording state
+            # Recording ON
             # ------------------------------------------------
 
             self.is_recording = True
@@ -220,44 +192,24 @@ class MicScreen:
                 "blue"
             )
 
-
             # ------------------------------------------------
-            # Start recorder
+            # Start AudioRecorder
             # ------------------------------------------------
 
-            started = await self.recorder.start_recording(
-
+            await self.recorder.start_recording(
                 configuration=far.AudioRecorderConfiguration(
-
                     encoder=far.AudioEncoder.PCM16BITS,
-
                     sample_rate=SAMPLE_RATE,
-
                     channels=CHANNELS,
                 )
             )
-
-
-            if not started:
-
-                self.is_recording = False
-
-                self.on_recording_change(False)
-
-                self.on_status(
-                    "Microphone start nahi ho paya.",
-                    "red"
-                )
-
-                return
-
 
             # ------------------------------------------------
             # Start silence watcher
             # ------------------------------------------------
 
-            self.watch_task = asyncio.create_task(
-                self._watch_recording()
+            self.silence_task = asyncio.create_task(
+                self._watch_silence()
             )
 
         except Exception as ex:
@@ -271,113 +223,50 @@ class MicScreen:
                 "red"
             )
 
+            print(
+                "Start recording error:",
+                ex
+            )
 
-    # ============================================================
+
+    # ========================================================
     # AUDIO STREAM
-    # ============================================================
+    # ========================================================
 
-    def _on_audio_stream(
-        self,
-        e: far.AudioRecorderStreamEvent
-    ):
+    def _on_audio_stream(self, e):
 
         if not self.is_recording:
-
             return
 
         try:
 
-            chunk = e.chunk
+            # Flet AudioRecorder stream event
+            chunk = getattr(
+                e,
+                "chunk",
+                None
+            )
 
             if not chunk:
-
                 return
 
-
             # ------------------------------------------------
-            # Save audio safely
+            # Save audio
             # ------------------------------------------------
 
             with self.lock:
 
-                if not self.is_recording:
+                if self.is_recording:
 
-                    return
-
-                self.audio_buffer.extend(chunk)
-
-                self.transcription_buffer.extend(chunk)
-
-
-            # ------------------------------------------------
-            # Detect voice
-            # ------------------------------------------------
-
-            audio_np = np.frombuffer(
-                chunk,
-                dtype=np.int16
-            )
-
-            if len(audio_np) == 0:
-
-                return
-
-
-            rms = float(
-                np.sqrt(
-                    np.mean(
-                        audio_np.astype(
-                            np.float64
-                        ) ** 2
-                    )
-                )
-            )
-
-
-            if rms > RMS_THRESHOLD:
-
-                self.speech_started = True
-
-                self.last_voice_time = time.time()
-
-
-            # ------------------------------------------------
-            # Live transcription trigger
-            # ------------------------------------------------
-
-            now = time.time()
-
-            if (
-                self.speech_started
-                and
-                not self.transcribing
-                and
-                (
-                    now - self.last_transcription_time
-                    >= TRANSCRIBE_INTERVAL
-                )
-            ):
-
-                self.last_transcription_time = now
-
-                # Take current transcription audio
-                with self.lock:
-
-                    audio_for_transcription = bytes(
-                        self.transcription_buffer
+                    self.frames.append(
+                        bytes(chunk)
                     )
 
-                    self.transcription_buffer = bytearray()
+            # ------------------------------------------------
+            # Audio received
+            # ------------------------------------------------
 
-
-                if audio_for_transcription:
-
-                    self.transcribing = True
-
-                    self.page.run_thread(
-                        self._transcribe_chunk,
-                        audio_for_transcription
-                    )
+            self.last_audio_time = time.time()
 
         except Exception as ex:
 
@@ -387,11 +276,159 @@ class MicScreen:
             )
 
 
-    # ============================================================
-    # TRANSCRIBE CHUNK
-    # ============================================================
+    # ========================================================
+    # SILENCE DETECTION
+    # ========================================================
 
-    def _transcribe_chunk(
+    async def _watch_silence(self):
+
+        while self.is_recording:
+
+            await asyncio.sleep(
+                0.1
+            )
+
+            if not self.is_recording:
+                return
+
+            now = time.time()
+
+            # ------------------------------------------------
+            # User stopped speaking
+            # ------------------------------------------------
+
+            if (
+                now - self.last_audio_time
+                >= SILENCE_SECONDS
+            ):
+
+                await self.stop_recording()
+
+                return
+
+            # ------------------------------------------------
+            # Maximum recording time
+            # ------------------------------------------------
+
+            if (
+                now - self.record_start_time
+                >= MAX_RECORD_SECONDS
+            ):
+
+                await self.stop_recording()
+
+                return
+
+
+    # ========================================================
+    # STOP RECORDING
+    # ========================================================
+
+    async def stop_recording(self):
+
+        if not self.is_recording:
+            return
+
+        if self.stop_in_progress:
+            return
+
+        self.stop_in_progress = True
+
+        # ----------------------------------------------------
+        # Immediately turn OFF UI
+        # ----------------------------------------------------
+
+        self.is_recording = False
+
+        self.on_recording_change(False)
+
+        try:
+
+            # ------------------------------------------------
+            # Stop recorder
+            # ------------------------------------------------
+
+            try:
+
+                await self.recorder.stop_recording()
+
+            except Exception as ex:
+
+                print(
+                    "Recorder stop error:",
+                    ex
+                )
+
+            # ------------------------------------------------
+            # Copy frames safely
+            # ------------------------------------------------
+
+            with self.lock:
+
+                frames = list(
+                    self.frames
+                )
+
+                self.frames.clear()
+
+            # ------------------------------------------------
+            # No audio
+            # ------------------------------------------------
+
+            if not frames:
+
+                self.on_status(
+                    "Kuch record nahi hua.",
+                    "red"
+                )
+
+                return
+
+            # ------------------------------------------------
+            # Join all PCM chunks
+            # ------------------------------------------------
+
+            audio_bytes = b"".join(
+                frames
+            )
+
+            self.on_status(
+                "Transcribing...",
+                "blue"
+            )
+
+            # ------------------------------------------------
+            # Transcription in background
+            # ------------------------------------------------
+
+            threading.Thread(
+                target=self._transcribe,
+                args=(audio_bytes,),
+                daemon=True
+            ).start()
+
+        except Exception as ex:
+
+            print(
+                "Stop recording error:",
+                ex
+            )
+
+            self.on_status(
+                f"Error: {ex}",
+                "red"
+            )
+
+        finally:
+
+            self.stop_in_progress = False
+
+
+    # ========================================================
+    # TRANSCRIBE
+    # ========================================================
+
+    def _transcribe(
         self,
         audio_bytes
     ):
@@ -400,22 +437,25 @@ class MicScreen:
 
             if not audio_bytes:
 
+                self._status(
+                    "Kuch bola nahi gaya.",
+                    "red"
+                )
+
                 return
 
-
             # ------------------------------------------------
-            # SpeechRecognition audio
+            # Convert PCM to SpeechRecognition AudioData
             # ------------------------------------------------
 
             audio_data = sr.AudioData(
                 audio_bytes,
                 SAMPLE_RATE,
-                BYTES_PER_SAMPLE
+                SAMPLE_WIDTH
             )
 
-
             # ------------------------------------------------
-            # Google speech recognition
+            # Google Speech Recognition
             # ------------------------------------------------
 
             text = self.recognizer.recognize_google(
@@ -423,43 +463,38 @@ class MicScreen:
                 language="en-IN"
             )
 
-
             text = text.strip()
 
-            if not text:
+            if text:
 
-                return
+                # Put recognized text into TextField
+                self._result(text)
 
+                self._status(
+                    "",
+                    "white"
+                )
 
-            # ------------------------------------------------
-            # Add text
-            # ------------------------------------------------
+            else:
 
-            self._add_live_text(text)
-
+                self._status(
+                    "Samajh nahi aaya.",
+                    "red"
+                )
 
         except sr.UnknownValueError:
 
-            # Small chunks often don't contain a complete
-            # recognizable sentence. Ignore this silently.
-
-            pass
-
-
-        except sr.RequestError as ex:
-
-            print(
-                "Speech service error:",
-                ex
-            )
-
-
-            self.page.run_task(
-                self._show_status,
-                f"Speech service error: {ex}",
+            self._status(
+                "Samajh nahi aaya, dobara boliye.",
                 "red"
             )
 
+        except sr.RequestError as ex:
+
+            self._status(
+                f"Speech service error: {ex}",
+                "red"
+            )
 
         except Exception as ex:
 
@@ -468,120 +503,17 @@ class MicScreen:
                 ex
             )
 
-        finally:
-
-            self.transcribing = False
-
-
-    # ============================================================
-    # ADD LIVE TEXT
-    # ============================================================
-
-    def _add_live_text(self, new_text):
-
-        new_text = new_text.strip()
-
-        if not new_text:
-
-            return
-
-
-        # ------------------------------------------------
-        # Avoid obvious duplicate text
-        # ------------------------------------------------
-
-        if self.final_text:
-
-            old_words = self.final_text.lower().split()
-
-            new_words = new_text.lower().split()
-
-
-            # Find overlap between end of old text
-            # and beginning of new text.
-
-            overlap = 0
-
-            max_overlap = min(
-                6,
-                len(old_words),
-                len(new_words)
+            self._status(
+                f"Transcription error: {ex}",
+                "red"
             )
 
 
-            for n in range(
-                max_overlap,
-                0,
-                -1
-            ):
+    # ========================================================
+    # SAFE CALLBACKS
+    # ========================================================
 
-                if (
-                    old_words[-n:]
-                    ==
-                    new_words[:n]
-                ):
-
-                    overlap = n
-
-                    break
-
-
-            if overlap:
-
-                new_text = " ".join(
-                    new_text.split()[overlap:]
-                )
-
-
-        if not new_text:
-
-            return
-
-
-        # ------------------------------------------------
-        # Append
-        # ------------------------------------------------
-
-        if self.final_text:
-
-            self.final_text += " "
-
-        self.final_text += new_text
-
-
-        # ------------------------------------------------
-        # Send to TextField
-        # ------------------------------------------------
-
-        self.page.run_task(
-            self._deliver_text,
-            self.final_text
-        )
-
-
-    # ============================================================
-    # DELIVER TEXT TO HOME SCREEN
-    # ============================================================
-
-    async def _deliver_text(self, text):
-
-        try:
-
-            self.on_result(text)
-
-        except Exception as ex:
-
-            print(
-                "Result callback error:",
-                ex
-            )
-
-
-    # ============================================================
-    # STATUS
-    # ============================================================
-
-    async def _show_status(
+    def _status(
         self,
         text,
         color="white"
@@ -602,162 +534,20 @@ class MicScreen:
             )
 
 
-    # ============================================================
-    # WATCH RECORDING
-    # ============================================================
-
-    async def _watch_recording(self):
-
-        while self.is_recording:
-
-            await asyncio.sleep(0.1)
-
-            if not self.is_recording:
-
-                return
-
-
-            now = time.time()
-
-
-            # ------------------------------------------------
-            # Auto stop after silence
-            # ------------------------------------------------
-
-            if (
-                self.speech_started
-                and
-                (
-                    now - self.last_voice_time
-                    >= SILENCE_SECONDS
-                )
-            ):
-
-                await self.stop_recording()
-
-                return
-
-
-            # ------------------------------------------------
-            # Maximum recording time
-            # ------------------------------------------------
-
-            if (
-                now - self.record_start_time
-                >= MAX_RECORD_SECONDS
-            ):
-
-                await self.stop_recording()
-
-                return
-
-
-    # ============================================================
-    # STOP RECORDING
-    # ============================================================
-
-    async def stop_recording(self):
-
-        if not self.is_recording:
-
-            return
-
-        if self.stop_in_progress:
-
-            return
-
-
-        self.stop_in_progress = True
-
-        self.is_recording = False
-
-
-        # ------------------------------------------------
-        # UI
-        # ------------------------------------------------
-
-        self.on_recording_change(False)
-
+    def _result(
+        self,
+        text
+    ):
 
         try:
 
-            # ------------------------------------------------
-            # Stop recorder safely
-            # ------------------------------------------------
-
-            try:
-
-                await self.recorder.stop_recording()
-
-            except Exception as ex:
-
-                print(
-                    "Recorder stop error:",
-                    ex
-                )
-
-
-            # ------------------------------------------------
-            # Get remaining transcription audio
-            # ------------------------------------------------
-
-            with self.lock:
-
-                remaining_audio = bytes(
-                    self.transcription_buffer
-                )
-
-                self.transcription_buffer = bytearray()
-
-
-            # ------------------------------------------------
-            # Transcribe remaining audio
-            # ------------------------------------------------
-
-            if remaining_audio:
-
-                self.transcribing = True
-
-                self._transcribe_chunk(
-                    remaining_audio
-                )
-
-                self.transcribing = False
-
-
-            # ------------------------------------------------
-            # Final result
-            # ------------------------------------------------
-
-            if self.final_text:
-
-                self.on_status(
-                    "",
-                    "white"
-                )
-
-            else:
-
-                self.on_status(
-                    "Kuch bola nahi gaya.",
-                    "red"
-                )
-
+            self.on_result(
+                text
+            )
 
         except Exception as ex:
 
             print(
-                "Stop recording error:",
+                "Result callback error:",
                 ex
             )
-
-            self.on_status(
-                f"Error: {ex}",
-                "red"
-            )
-
-        finally:
-
-            self.stop_in_progress = False
-
-            self.speech_started = False
