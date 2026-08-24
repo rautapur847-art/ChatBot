@@ -10,12 +10,14 @@ def SettingScreen(page: ft.Page,user_id,name):
     from screens.privacy import PrivacyScreen
 
     page.theme_mode = ft.ThemeMode.DARK
+    async def Go_Home(e):
+        await HomeScreen(page,user_id,name)
 
     page.appbar = ft.AppBar(
         leading=ft.IconButton(
             ft.Icons.ARROW_BACK,
             tooltip="Home",
-            on_click=lambda e: HomeScreen(page,user_id,name)
+            on_click=Go_Home
         ),
         title=ft.Text("Settings", color="white", weight=ft.FontWeight.BOLD),
         center_title=True,
