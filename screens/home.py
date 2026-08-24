@@ -597,12 +597,16 @@ async def HomeScreen(page: ft.Page, user_id, name):
                         ),
                     ),
 
-                    history_sidebar.view,
-
-                    ft.Container(
-                        expand=True,
-                        
+                   ft.Container(
+                     expand=True,
+                       content=ft.Column(
+                      controls=[history_sidebar.view],
+                     scroll=ft.ScrollMode.AUTO,
+                      expand=True,
+                      ),
                     ),
+
+                
                     ft.Divider(),
                     ft.ListTile(
                         title=ft.Text("Setting", color="white", weight=ft.FontWeight.BOLD),
