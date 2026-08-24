@@ -10,14 +10,7 @@ from PIL import Image
 
 
 load_dotenv()  # reads .env in your project root
-load_dotenv()
 
-print("SMTP_EMAIL:", os.getenv("SMTP_EMAIL"))
-print("PASSWORD FOUND:", bool(os.getenv("SMTP_PASSWORD")))
-print("SMTP_EMAIL:", os.getenv("MYSQL_HOST"))
-print("PASSWORD FOUND:",os.getenv("MYSQL_USER"))
-print("SMTP_EMAIL:", os.getenv("MYSQL_PASSWORD"))
-print("PASSWORD FOUND:",os.getenv("MYSQL_DATABASE"))
 gn.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = gn.GenerativeModel("gemini-3.6-flash")
 
@@ -28,7 +21,7 @@ _BLANK_PIXEL = (
 )
 
 
-async def HomeScreen(page: ft.Page,user_id,name):
+async def HomeScreen(page: ft.Page, user_id, name):
     page.clean()
     from database.db import ChatBotDatabase
     from screens.chat_history import ChatHistory 
@@ -756,8 +749,4 @@ async def HomeScreen(page: ft.Page,user_id,name):
         attachment_container,
         ft.Row([user_msg]),
     )
-        # 🌟 बिल्कुल सटीक सुधार: Async एनवायरनमेंट के लिए सही अपडेट कमांड्स
-    page.add(main_layout)
     page.update()
-
-
