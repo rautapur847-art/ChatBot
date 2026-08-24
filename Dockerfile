@@ -3,9 +3,10 @@ FROM python:3.11-slim
 # आवश्यक सिस्टम पैकेजेस
 RUN apt-get update && apt-get install -y \
     portaudio19-dev \
-    libgl1-mesa-glx \
+    libglvnd0 \
     libglib2.0-0 \
     gcc \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
