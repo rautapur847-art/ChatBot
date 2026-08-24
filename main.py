@@ -11,12 +11,12 @@ async def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
-    # 🌟 नए वर्ज़न का सही एट्रिब्यूट: page.local_storage
-    user_logged_in = await page.local_storage.get_async("is_logged_in")
+    # 🌟 बिल्कुल सटीक सुधार: Flet के लेटेस्ट वर्ज़न के अनुसार page.shared_preferences का उपयोग
+    user_logged_in = await page.shared_preferences.get_async("is_logged_in")
     
     if user_logged_in == "true": 
-        user_id = await page.local_storage.get_async("user_id")
-        name = await page.local_storage.get_async("name")
+        user_id = await page.shared_preferences.get_async("user_id")
+        name = await page.shared_preferences.get_async("name")
         HomeScreen(page, int(user_id), name)
     else:
         LoginScreen(page)
