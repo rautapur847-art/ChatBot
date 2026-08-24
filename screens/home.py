@@ -756,5 +756,7 @@ async def HomeScreen(page: ft.Page,user_id,name):
         attachment_container,
         ft.Row([user_msg]),
     )
+        # 🌟 बिल्कुल सटीक सुधार: Async एनवायरनमेंट के लिए सही अपडेट कमांड्स
     page.add(main_layout)
-    page.update()
+    await page.update_async()
+
