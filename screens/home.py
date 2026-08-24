@@ -10,7 +10,14 @@ from PIL import Image
 
 
 load_dotenv()  # reads .env in your project root
+load_dotenv()
 
+print("SMTP_EMAIL:", os.getenv("SMTP_EMAIL"))
+print("PASSWORD FOUND:", bool(os.getenv("SMTP_PASSWORD")))
+print("SMTP_EMAIL:", os.getenv("MYSQL_HOST"))
+print("PASSWORD FOUND:",os.getenv("MYSQL_USER"))
+print("SMTP_EMAIL:", os.getenv("MYSQL_PASSWORD"))
+print("PASSWORD FOUND:",os.getenv("MYSQL_DATABASE"))
 gn.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = gn.GenerativeModel("gemini-3.6-flash")
 
@@ -21,7 +28,7 @@ _BLANK_PIXEL = (
 )
 
 
-def HomeScreen(page: ft.Page,user_id,user_name):
+def HomeScreen(page: ft.Page,user_id,name):
     page.clean()
     from database.db import ChatBotDatabase
     from screens.chat_history import ChatHistory 
@@ -501,7 +508,7 @@ def HomeScreen(page: ft.Page,user_id,user_name):
 
     async def open_profile(e):
         await page.close_drawer()
-        ProfileScreen(page, user_id, user_name)
+        ProfileScreen(page, user_id, name)
 
     page.appbar = ft.AppBar(
         leading=ft.IconButton(
@@ -541,7 +548,7 @@ def HomeScreen(page: ft.Page,user_id,user_name):
                         trailing=ft.GestureDetector(
                         content=ft.CircleAvatar(
                             content=ft.Text(
-                                get_initials(user_name),
+                                get_initials(name),
                                 weight=ft.FontWeight.BOLD,
                             ),
                             radius=25,
@@ -562,7 +569,7 @@ def HomeScreen(page: ft.Page,user_id,user_name):
                     ft.ListTile(
                         title=ft.Text("Home", color="white",weight=ft.FontWeight.BOLD),
                         leading=ft.Icon(ft.Icons.HOME, color="white"),
-                        on_click=Navigation(lambda e:HomeScreen(page,user_id,user_name)),
+                        on_click=Navigation(lambda e:HomeScreen(page,user_id,name)),
                         tooltip="Home"
                     ),
                     ft.Divider(),
@@ -595,7 +602,7 @@ def HomeScreen(page: ft.Page,user_id,user_name):
                     ft.ListTile(
                         title=ft.Text("Setting", color="white", weight=ft.FontWeight.BOLD),
                         leading=ft.Icon(ft.Icons.SETTINGS, color="green"),
-                        on_click=Navigation(lambda e: SettingScreen(page,user_id,user_name)),
+                        on_click=Navigation(lambda e: SettingScreen(page,user_id,name)),
                         tooltip="Setting"
                     ),
                     ft.Divider(),

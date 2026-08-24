@@ -1,7 +1,7 @@
 import flet as ft
 
 
-def SettingScreen(page: ft.Page,user_id,user_name):
+def SettingScreen(page: ft.Page,user_id,name):
 
     page.clean()
     from screens.home import HomeScreen
@@ -15,7 +15,7 @@ def SettingScreen(page: ft.Page,user_id,user_name):
         leading=ft.IconButton(
             ft.Icons.ARROW_BACK,
             tooltip="Home",
-            on_click=lambda e: HomeScreen(page,user_id,user_name),
+            on_click=lambda e: HomeScreen(page,user_id,name),
         ),
         title=ft.Text("Settings", color="white", weight=ft.FontWeight.BOLD),
         center_title=True,
@@ -30,7 +30,7 @@ def SettingScreen(page: ft.Page,user_id,user_name):
                 title=ft.Text("About", color="white", weight=ft.FontWeight.BOLD),
                 subtitle=ft.Text("App version, credits", color=ft.Colors.WHITE_54),
                 trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT, color=ft.Colors.WHITE_54),
-                on_click=lambda e: AboutScreen(page,user_id,user_name),
+                on_click=lambda e: AboutScreen(page,user_id,name),
             ),
             ft.Divider(color=ft.Colors.WHITE_24),
             ft.ListTile(
@@ -38,7 +38,7 @@ def SettingScreen(page: ft.Page,user_id,user_name):
                 title=ft.Text("Help & Support", color="white", weight=ft.FontWeight.BOLD),
                 subtitle=ft.Text("FAQs, contact support", color=ft.Colors.WHITE_54),
                 trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT, color=ft.Colors.WHITE_54),
-                on_click=lambda e: HelpSupportScreen(page,user_id,user_name),
+                on_click=lambda e: HelpSupportScreen(page,user_id,name),
                 
             ),
             ft.Divider(color=ft.Colors.WHITE_24),
@@ -47,7 +47,7 @@ def SettingScreen(page: ft.Page,user_id,user_name):
                 title=ft.Text("Privacy Policy", color="white", weight=ft.FontWeight.BOLD),
                 subtitle=ft.Text("How your data is used", color=ft.Colors.WHITE_54),
                 trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT, color=ft.Colors.WHITE_54),
-                on_click=lambda e: PrivacyScreen(page,user_id,user_name),
+                on_click=lambda e: PrivacyScreen(page,user_id,name),
             ),
             ft.Divider(color=ft.Colors.WHITE_24),
         ],

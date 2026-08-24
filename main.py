@@ -19,8 +19,8 @@ async def main(page: ft.Page):
     
     if user_logged_in == "true": # SharedPreferences हमेशा String स्टोर करता है
         user_id = await prefs.get("user_id")
-        user_name = await prefs.get("user_name")
-        HomeScreen(page, int(user_id), user_name)
+        name = await prefs.get("name")
+        HomeScreen(page, int(user_id), name)
     else:
         LoginScreen(page)
 

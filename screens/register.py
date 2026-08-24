@@ -54,6 +54,12 @@ def Register(page: ft.Page):
 
     async def register_user(e):
 
+        # NOTE: renamed to user_name — assigning to a bare `name` here
+        # would shadow the `name` TextField from the enclosing scope,
+        # making Python treat `name` as local to this function for its
+        # *entire* body, so `name.value` on the right-hand side would
+        # try to read a local variable that doesn't have a value yet
+        # (UnboundLocalError), instead of the outer TextField widget.
         user_name = name.value.strip()
         user_email = email.value.strip()
         user_mobile = mobile.value.strip()
@@ -101,6 +107,7 @@ def Register(page: ft.Page):
 
             message.value = f"Registration error: {ex}"
             message.color = "red"
+            message.selectable=True
             page.update()
 
     page.add(

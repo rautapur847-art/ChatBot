@@ -1,7 +1,7 @@
 import flet as ft
 
 
-def AboutScreen(page: ft.Page,user_id,user_name):
+def AboutScreen(page: ft.Page,user_id,name):
     page.clean()
     from screens.setting import SettingScreen
     
@@ -12,7 +12,7 @@ def AboutScreen(page: ft.Page,user_id,user_name):
         leading=ft.IconButton(
             ft.Icons.ARROW_BACK,
             tooltip="Setting",
-            on_click=lambda e: SettingScreen(page,user_id,user_name),
+            on_click=lambda e: SettingScreen(page,user_id,name),
         ),
         title=ft.Text("About", color="white", weight=ft.FontWeight.BOLD),
         center_title=True,

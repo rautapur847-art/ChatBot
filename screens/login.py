@@ -50,18 +50,18 @@ def LoginScreen(page: ft.Page):
 
             if user:
                 user_id = user["user_id"]
-                user_name = user["name"]
+                name = user["name"]
                 print("User ID:", user_id)
-                print("User Name:", user_name)
+                print("User Name:", name)
                 
                 # 🌟 सुधार 1: Flet 1.0 स्टैंडअलोन SharedPreferences में डेटा सुरक्षित सेव किया
                 prefs = ft.SharedPreferences()
                 await prefs.set("is_logged_in", "true")
                 await prefs.set("user_id", str(user_id))
-                await prefs.set("user_name", str(user_name))
+                await prefs.set("name", str(name))
                 
                 async def launch_home():
-                    HomeScreen(page, user_id, user_name)
+                    HomeScreen(page, user_id, name)
                 # 🌟 सुधार 2: डार्क स्क्रीन बग फिक्स! होमपेज को बैकग्राउंड थ्रेड से स्क्रीन पर रेंडर करने के लिए run_task का उपयोग किया
                 page.run_task(launch_home)
             else:
@@ -71,6 +71,7 @@ def LoginScreen(page: ft.Page):
         except Exception as ex:
             message.value = f"Login error: {ex}"
             message.color = "red"
+            message.selectable=True
             page.update()          
                 
     page.add( 
