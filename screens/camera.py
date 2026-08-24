@@ -153,7 +153,11 @@ class CameraScreen:
         if self.cap:
             self.cap.release()
             self.cap = None
-        cv2.destroyAllWindows()
+        # NOTE: no cv2.destroyAllWindows() here — that's a GUI/highgui
+        # function which opencv-python-headless doesn't implement (we
+        # never use cv2.imshow anyway; frames are sent to the Flet UI as
+        # base64, not shown in a native OpenCV window), so calling it
+        # crashes with "The function is not implemented."
         if self.camera_dialog.open:
             self.page.pop_dialog()
         else:
@@ -165,4 +169,4 @@ class CameraScreen:
         if self.cap:
             self.cap.release()
             self.cap = None
-        cv2.destroyAllWindows()
+        
