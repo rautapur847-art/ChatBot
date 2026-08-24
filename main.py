@@ -1,5 +1,6 @@
 import flet as ft 
 import asyncio
+import inspect
 from screens.home import HomeScreen
 from screens.login import LoginScreen 
 
@@ -11,7 +12,7 @@ async def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
-    # वर्ज़न की समस्या से बचने के लिए यूनिवर्सल स्टोरेज हैंडलर
+    # यूनिवर्सल स्टोरेज हैंडलर
     storage = getattr(page, "shared_preferences", getattr(page, "client_storage", None))
     
     user_logged_in = "false"
@@ -28,16 +29,21 @@ async def main(page: ft.Page):
             user_id = storage.get("user_id")
             name = storage.get("name")
             
-    # पुरानी किसी भी स्क्रीन के कंट्रोल्स को पूरी तरह साफ़ करें
     page.controls.clear()
     
-    # 🌟 बिल्कुल सटीक सुधार: बिना किसी 'go' या 'go_async' के सीधे स्क्रीन लोड करना
+    # 🌟 जादुई सुधार: यह कोड खुद चेक करेगा कि फ़ंक्शन async है या normal, और बिना एरर के रन करेगा
     if user_logged_in == "true" and user_id and name: 
-        await HomeScreen(page, int(user_id), name) 
+        if inspect.iscoroutinefunction(HomeScreen):
+            await HomeScreen(page, int(user_id), name)
+        else:
+            HomeScreen(page, int(user_id), name)
     else:
-        await LoginScreen(page) 
+        if inspect.iscoroutinefunction(LoginScreen):
+            await LoginScreen(page)
+        else:
+            LoginScreen(page)
 
-    # वर्ज़न के अनुसार स्क्रीन को सही ढंग से अपडेट करना
+    # स्क्रीन को सुरक्षित रूप से अपडेट करना
     if hasattr(page, "update_async"):
         await page.update_async()
     else:
