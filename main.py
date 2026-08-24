@@ -11,12 +11,12 @@ async def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
-    # 🌟 सुधार: SharedPreferences की जगह सर्वर-फ्रेंडली client_storage का उपयोग करें
-    user_logged_in = await page.client_storage.get_async("is_logged_in")
+    # 🌟 नए वर्ज़न का सही एट्रिब्यूट: page.local_storage
+    user_logged_in = await page.local_storage.get_async("is_logged_in")
     
     if user_logged_in == "true": 
-        user_id = await page.client_storage.get_async("user_id")
-        name = await page.client_storage.get_async("name")
+        user_id = await page.local_storage.get_async("user_id")
+        name = await page.local_storage.get_async("name")
         HomeScreen(page, int(user_id), name)
     else:
         LoginScreen(page)
