@@ -79,10 +79,22 @@ def LoginScreen(page: ft.Page):
                     await page.update_async()
                 else:
                     page.update()
+            elif password.value != password_value:
+                message.value = "Invalid password...."
+                message.color = "red"
+                page.update() 
+            elif email.value!=email_value:
+                message.value = "Invalid Email..."
+                message.color = "red"
+                page.update() 
+        
+                
+                
             else:
                 message.value = "Invalid email and password"
                 message.color = "red"
                 page.update()  
+                
         except Exception as ex:
             message.value = f"Login error: {ex}"
             message.color = "red"
