@@ -1,59 +1,57 @@
 import flet as ft
-import cv2
+import flet_camera as fc
 import base64
-import threading
-import time
 import os
-
-# 1x1 transparent PNG, used as a placeholder so ft.Image always has a
-# valid src (Flet raises "A valid src value must be specified."
-# if src is empty when the control renders). In this Flet version, src
-# itself accepts a URL, a base64 string, or raw bytes - there is no
-# separate src_base64 property.
-_BLANK_PIXEL = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42Y"
-    "AAAAASUVORK5CYII="
-)
+import time
 
 
 class CameraScreen:
     """
-    Live camera popup.
+    Live camera popup — now backed by flet-camera, which accesses the
+    camera on the USER'S OWN device (via the browser/OS), not the server.
+    This is what makes it actually work on a hosted --web deployment,
+    where the server itself obviously has no physical camera.
 
-    Instead of scanning page.overlay and guessing control indexes (which was
-    fragile and broke whenever the layout changed), the caller (home.py)
-    passes in:
       - on_status(text, color): called to update a status message
       - on_captured(image_path, b64_jpeg): called once a photo is captured
     """
 
     def __init__(self, page: ft.Page, on_status=None, on_captured=None):
         self.page = page
-        self.cap = None
-        self.is_streaming = False
         self.on_status = on_status or (lambda text, color="white": None)
         self.on_captured = on_captured or (lambda path, b64: None)
+        self.selected_camera = None
+        self.is_initialized = False
 
-        self.camera_preview = ft.Image(
-            src=_BLANK_PIXEL,
+        self.preview = fc.Camera(
             width=280,
             height=210,
-            fit=ft.BoxFit.CONTAIN,
+            preview_enabled=True,
+            content=ft.Container(
+                alignment=ft.Alignment(0, 0),
+                content=ft.Icon(ft.Icons.CAMERA_ALT, color=ft.Colors.WHITE_70, size=48),
+            ),
+        )
+
+        self.dialog_status = ft.Text("Starting camera...", size=12, color=ft.Colors.WHITE_70)
+
+        self.capture_button = ft.ElevatedButton(
+            "Capture",
+            icon=ft.Icons.CAMERA_ALT,
+            bgcolor=ft.Colors.BLUE,
+            color=ft.Colors.WHITE,
+            on_click=self.capture_photo,
+            disabled=True,
         )
 
         self.camera_dialog = ft.AlertDialog(
             title=ft.Text("Live Camera", size=16, weight=ft.FontWeight.BOLD),
             content=ft.Column(
                 [
-                    self.camera_preview,
+                    self.preview,
+                    self.dialog_status,
                     ft.Container(
-                        content=ft.ElevatedButton(
-                            "Capture",
-                            icon=ft.Icons.CAMERA_ALT,
-                            bgcolor=ft.Colors.BLUE,
-                            color=ft.Colors.WHITE,
-                            on_click=self.capture_photo,
-                        ),
+                        content=self.capture_button,
                         alignment=ft.Alignment(0, 0),
                         margin=10,
                     ),
@@ -64,131 +62,97 @@ class CameraScreen:
             on_dismiss=self.on_dialog_close,
         )
 
-    def open_camera(self, e):
+    async def open_camera(self, e):
         self.on_status("Opening camera...", "blue")
+        self.dialog_status.value = "Starting camera..."
+        self.dialog_status.color = ft.Colors.WHITE_70
+        self.capture_button.disabled = True
 
-        # NOTE: we used to open the dialog immediately and only then check
-        # whether the camera actually exists — if it didn't (as on any
-        # hosted --web deployment, where this Python code runs on the
-        # SERVER, which has no physical camera), the dialog got opened and
-        # immediately popped again. That round-trip could leave Flet's
-        # dialog-stack state out of sync, causing a LATER attempt to open
-        # any dialog to fail with "Dialog is already opened". Now we
-        # probe the camera first, in the background, and only touch the
-        # dialog at all if it actually opened successfully.
-        threading.Thread(target=self._probe_and_stream, daemon=True).start()
-
-    def _probe_and_stream(self):
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-
-        if not self.cap.isOpened():
-            self.on_status("Camera hardware not found!", "red")
-            self.cap = None
-            return  # dialog was never opened — nothing to clean up
-
-        self.is_streaming = True
+        # Open the dialog FIRST — the Camera control only becomes usable
+        # once it's actually mounted in the page tree, so calling its
+        # async methods before the dialog is shown would fail.
         try:
             self.page.show_dialog(self.camera_dialog)
         except Exception as ex:
-            # Something's already open/out of sync — don't crash the app.
             self.on_status(f"Couldn't open camera popup: {ex}", "red")
-            self.is_streaming = False
-            self.cap.release()
-            self.cap = None
+            return
+        self.page.update()
+
+        try:
+            cameras = await self.preview.get_available_cameras()
+        except Exception as ex:
+            self.dialog_status.value = f"Camera error: {ex}"
+            self.dialog_status.color = ft.Colors.RED_300
+            self.page.update()
             return
 
-        self._stream_camera()
+        if not cameras:
+            # On web, this means the browser denied/has no camera access
+            # (not "no server camera" anymore, since this runs client-side).
+            self.dialog_status.value = "No camera found — check browser permissions."
+            self.dialog_status.color = ft.Colors.RED_300
+            self.page.update()
+            return
 
-    def _stream_camera(self):
-        # Keep the capture device itself at a small resolution so we're not
-        # reading (and then downscaling) huge frames every loop.
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+        # Prefer a back-facing camera (more useful on phones); fall back
+        # to whatever's first (typical on laptops/desktops).
+        self.selected_camera = next(
+            (c for c in cameras if c.lens_direction == fc.CameraLensDirection.BACK),
+            cameras[0],
+        )
 
-        consecutive_failures = 0
-        jpeg_params = [int(cv2.IMWRITE_JPEG_QUALITY), 55]
-
-        while self.is_streaming and self.cap.isOpened():
-            ret, frame = self.cap.read()
-            if not ret:
-                break
-
-            _, buffer = cv2.imencode(".jpg", frame, jpeg_params)
-            b64_string = base64.b64encode(buffer).decode("utf-8")
-            self.camera_preview.src = b64_string
-
-            try:
-                # Update just this control, not the whole page — much
-                # smaller payload over the websocket than page.update().
-                self.camera_preview.update()
-                consecutive_failures = 0
-            except Exception:
-                # The websocket hiccuped/disconnected for this frame.
-                # Don't crash the thread — just skip the frame and retry.
-                consecutive_failures += 1
-                if consecutive_failures > 20:
-                    # Connection is genuinely gone; stop trying.
-                    self.is_streaming = False
-                    break
-
-            # ~12 fps is plenty for a preview and is far gentler on the
-            # websocket than the original ~33 fps.
-            time.sleep(0.08)
-
-        if self.cap:
-            self.cap.release()
-            self.cap = None
-
-    def capture_photo(self, e):
         try:
-            if not (self.cap and self.cap.isOpened()):
-                raise Exception("Camera is not open.")
+            await self.preview.initialize(
+                description=self.selected_camera,
+                resolution_preset=fc.ResolutionPreset.MEDIUM,
+                enable_audio=False,
+                image_format_group=fc.ImageFormatGroup.JPEG,
+            )
+        except Exception as ex:
+            self.dialog_status.value = f"Couldn't start camera: {ex}"
+            self.dialog_status.color = ft.Colors.RED_300
+            self.page.update()
+            return
 
-            ret, frame = self.cap.read()
-            if not ret:
-                raise Exception("Failed to read frame from camera.")
+        self.is_initialized = True
+        self.dialog_status.value = "Camera ready"
+        self.dialog_status.color = ft.Colors.WHITE_70
+        self.capture_button.disabled = False
+        self.page.update()
+
+    async def capture_photo(self, e):
+        if not self.is_initialized:
+            self.dialog_status.value = "Camera is not ready yet."
+            self.dialog_status.color = ft.Colors.RED_300
+            self.page.update()
+            return
+
+        try:
+            data = await self.preview.take_picture()  # raw JPEG bytes
+            b64_jpeg = base64.b64encode(data).decode("utf-8")
 
             os.makedirs("assets", exist_ok=True)
             img_path = os.path.join("assets", f"captured_{int(time.time())}.jpg")
-            cv2.imwrite(img_path, frame)
+            with open(img_path, "wb") as f:
+                f.write(data)
 
-            _, buffer = cv2.imencode(".jpg", frame)
-            captured_b64 = base64.b64encode(buffer).decode("utf-8")
-
-            # Close the small live-camera popup first...
             self.close_camera_popup()
-
-            # ...then hand the captured photo back to home.py to display
-            # it and "upload" (send to Gemini) it.
-            self.on_captured(img_path, captured_b64)
-
+            self.on_captured(img_path, b64_jpeg)
         except Exception as ex:
-            self.on_status(f"Capture error: {ex}", "red")
+            self.dialog_status.value = f"Capture error: {ex}"
+            self.dialog_status.color = ft.Colors.RED_300
             self.page.update()
 
     def close_camera_popup(self):
-        self.is_streaming = False
-        if self.cap:
-            self.cap.release()
-            self.cap = None
-        # NOTE: no cv2.destroyAllWindows() here — that's a GUI/highgui
-        # function which opencv-python-headless doesn't implement (we
-        # never use cv2.imshow anyway; frames are sent to the Flet UI as
-        # base64, not shown in a native OpenCV window), so calling it
-        # crashes with "The function is not implemented."
+        self.is_initialized = False
         try:
             if self.camera_dialog.open:
                 self.page.pop_dialog()
             else:
                 self.page.update()
         except Exception as ex:
-            # Dialog state got out of sync somehow — don't let that crash
-            # the whole app, just log it and move on.
             print(f"CameraScreen.close_camera_popup: {ex}")
 
     def on_dialog_close(self, e):
         # Fires if the user dismisses the popup by tapping outside it.
-        self.is_streaming = False
-        if self.cap:
-            self.cap.release()
-            self.cap = None
+        self.is_initialized = False
