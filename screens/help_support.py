@@ -3,7 +3,7 @@ import os
 import asyncio
 import resend
 from dotenv import load_dotenv
-
+import resend
 load_dotenv()  # reads .env in your project root
 
 SUPPORT_EMAIL = "rautapur847@gmail.com"
