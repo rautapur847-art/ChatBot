@@ -626,7 +626,7 @@ def LoginScreen(page: ft.Page):
     # =====================================================
 
     login_column = ft.Column(
-
+         scroll=ft.ScrollMode.AUTO,
         controls=[
 
             ft.Icon(
