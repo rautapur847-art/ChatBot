@@ -199,7 +199,7 @@ def Register(page: ft.Page):
 
     page.add(
         ft.Column(
-            scroll=ft.ScrollMode.AUTO,
+            
             [
                 ft.Icon(
                     ft.Icons.PERSON_ADD,
@@ -239,6 +239,7 @@ def Register(page: ft.Page):
 
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             alignment=ft.MainAxisAlignment.CENTER,
+            scroll=ft.ScrollMode.AUTO,
         )
     )
 
