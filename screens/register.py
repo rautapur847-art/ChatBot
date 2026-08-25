@@ -199,6 +199,7 @@ def Register(page: ft.Page):
 
     page.add(
         ft.Column(
+            scroll=ft.ScrollMode.AUTO,
             [
                 ft.Icon(
                     ft.Icons.PERSON_ADD,
