@@ -2,7 +2,7 @@ import flet as ft
 from database.db import ChatBotDatabase
 import asyncio
 import inspect
-import random
+from screens.captcha import generate_captcha
 
 def LoginScreen(page: ft.Page):
     from screens.register import Register
@@ -28,26 +28,47 @@ def LoginScreen(page: ft.Page):
         password=True
     )
 
-    # ---- simple math CAPTCHA (no external service/dependency needed) ----
-    captcha_state = {"a": 0, "b": 0}
+    # ---- real image-based CAPTCHA (distorted text, PIL-generated) ----
+    captcha_state = {"text": ""}
 
-    captcha_label = ft.Text("", color="white", weight=ft.FontWeight.BOLD)
+    captcha_image = ft.Image(
+        src="",
+        width=200,
+        height=70,
+        border_radius=8,
+        fit=ft.BoxFit.CONTAIN,
+    )
     captcha_answer = ft.TextField(
-        hint_text="Your answer...",
+        hint_text="Type the letters/numbers above...",
         label=" CAPTCHA answer...",
-        width=320,
+        width=250,
         prefix_icon=ft.Icons.SHIELD_OUTLINED,
     )
 
-    def refresh_captcha():
-        # New numbers each time — so a wrong/expired attempt can't just be
-        # retried against the same known answer.
-        captcha_state["a"] = random.randint(1, 9)
-        captcha_state["b"] = random.randint(1, 9)
-        captcha_label.value = f"Solve to continue: {captcha_state['a']} + {captcha_state['b']} = ?"
+    def refresh_captcha(e=None):
+        # New image + text each time — so a wrong/expired attempt can't
+        # just be retried against the same known answer.
+        text, b64 = generate_captcha()
+        captcha_state["text"] = text
+        captcha_image.src = b64
         captcha_answer.value = ""
+        page.update()
 
     refresh_captcha()
+
+    captcha_row = ft.Row(
+        controls=[
+            captcha_image,
+            ft.IconButton(
+                icon=ft.Icons.REFRESH,
+                icon_color="white",
+                tooltip="Get a new CAPTCHA",
+                on_click=refresh_captcha,
+            ),
+        ],
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=4,
+    )
     
     message = ft.Text(
         "",
@@ -66,13 +87,8 @@ def LoginScreen(page: ft.Page):
             return
 
         # ---- CAPTCHA check, before ever touching the database ----
-        expected = captcha_state["a"] + captcha_state["b"]
-        try:
-            entered = int(captcha_answer.value.strip())
-        except (TypeError, ValueError):
-            entered = None
-
-        if entered != expected:
+        entered = captcha_answer.value.strip()
+        if not entered or entered.upper() != captcha_state["text"].upper():
             message.value = "Incorrect CAPTCHA answer — try again."
             message.color = "red"
             refresh_captcha()
@@ -138,7 +154,7 @@ def LoginScreen(page: ft.Page):
                ft.Icon(ft.Icons.PERSON, size=90, color="blue"),
                ft.Text("login to continue.", color="white", font_family="arial"),
                email, password,
-               captcha_label, captcha_answer,
+               captcha_row, captcha_answer,
                message,
                ft.OutlinedButton(
                     "Login.",
