@@ -2,7 +2,7 @@ import flet as ft
 from database.db import ChatBotDatabase
 import inspect
 import os
-
+import asyncio
 from flet.auth.providers import GoogleOAuthProvider
 from screens.captcha import generate_captcha
 
@@ -572,7 +572,7 @@ def LoginScreen(page: ft.Page):
     # GOOGLE BUTTON CLICK
     # =====================================================
 
-    def google_login_click(e):
+    async def google_login_click(e):
 
         if google_provider is None:
 
@@ -590,7 +590,7 @@ def LoginScreen(page: ft.Page):
 
         try:
 
-            page.login(
+           await  page.login(
                 google_provider
             )
 
