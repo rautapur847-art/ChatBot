@@ -220,7 +220,7 @@ def LoginScreen(page: ft.Page):
                ft.Icon(ft.Icons.PERSON, size=90, color="blue"),
                ft.Text("login to continue.", color="white", font_family="arial"),
                google_button,
-               ft.Divider(width=320),
+               ft.Divider(),
                email, password,
                captcha_row, captcha_answer,
                message,
