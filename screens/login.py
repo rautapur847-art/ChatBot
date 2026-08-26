@@ -369,7 +369,7 @@ def LoginScreen(page: ft.Page):
     # Render production callback URL
     google_redirect_url = os.getenv(
         "OAUTH_REDIRECT_URL",
-        "https://1tp.onrender.com",
+        "https://chatbot-a1tp.onrender.com/oauth_callback",
     )
 
     print(
