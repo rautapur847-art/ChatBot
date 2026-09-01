@@ -29,8 +29,8 @@ def AboutScreen(page: ft.Page,user_id,name):
             ft.Container(
                 content=ft.Text(
                     spans=[
-                        ft.TextSpan("Chat", style=ft.TextStyle(color="red", weight=ft.FontWeight.BOLD, size=26)),
-                        ft.TextSpan("Bot", style=ft.TextStyle(color="blue", weight=ft.FontWeight.BOLD, size=26)),
+                        ft.TextSpan("Chat", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=26)),
+                        ft.TextSpan("AI", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=26)),
                     ]
                 ),
                 
