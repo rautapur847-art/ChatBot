@@ -162,8 +162,8 @@ def HelpSupportScreen(page: ft.Page,user_id,user_name):
      
             ft.Text(
                  spans=[
-                        ft.TextSpan("Sup", style=ft.TextStyle(color="red", weight=ft.FontWeight.BOLD, size=26)),
-                        ft.TextSpan("port.", style=ft.TextStyle(color="blue", weight=ft.FontWeight.BOLD, size=26)),
+                        ft.TextSpan("Sup", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=26)),
+                        ft.TextSpan("port.", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=26)),
                     ]
             ),
             ft.Divider(),
