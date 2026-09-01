@@ -563,8 +563,8 @@ async def HomeScreen(page: ft.Page, user_id, name):
                         min_leading_width=250,
                         leading=ft.Text(
                             spans=[
-                                ft.TextSpan("Chat", style=ft.TextStyle(color="red", weight=ft.FontWeight.BOLD, size=24)),
-                                ft.TextSpan("AI", style=ft.TextStyle(color="blue", weight=ft.FontWeight.BOLD, size=24)),
+                                ft.TextSpan("Chat", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=24)),
+                                ft.TextSpan("AI", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=24)),
                             ]
                         ),
                         margin=10
@@ -579,7 +579,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
                     ft.Divider(),
 
                     ft.ListTile(
-                        title=ft.Text("Clear chat", color="red", weight=ft.FontWeight.BOLD),
+                        title=ft.Text("Clear chat", color="white", weight=ft.FontWeight.BOLD),
                         leading=ft.Icon(ft.Icons.DELETE, color="red"),
                         on_click=chats_clear,
                         tooltip="chat clear."
