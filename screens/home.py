@@ -564,7 +564,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
                         leading=ft.Text(
                             spans=[
                                 ft.TextSpan("Chat", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=24)),
-                                ft.TextSpan("AI", style=ft.TextStyle(color="white", weight=ft.FontWeight.BOLD, size=24)),
+                                ft.TextSpan("AI", style=ft.TextStyle(color="blue", weight=ft.FontWeight.BOLD, size=24)),
                             ]
                         ),
                         margin=10
