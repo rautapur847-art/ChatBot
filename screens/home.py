@@ -438,10 +438,11 @@ async def HomeScreen(page: ft.Page, user_id, name):
 
         user_msg.value = ""
         clear_attachment()
-
+        progress.visible = True
         user_msg.hint_text = "Thinking...."
         user_msg.hint_style = ft.TextStyle(color="blue")
         user_msg.disabled = True
+        
         if image_path or has_file:
             upload_progress.value = None
         page.update()
@@ -492,6 +493,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
                 upload_progress.value = 1  
             user_msg.hint_text = "Ask anything...."
             user_msg.hint_style = ft.TextStyle(color="white")
+            progress.visible = False
             user_msg.disabled = False
             page.update()
 
@@ -542,7 +544,15 @@ async def HomeScreen(page: ft.Page, user_id, name):
         center_title=True,
         bgcolor=ft.Colors.TRANSPARENT,
     )
-
+    progress = ft.ProgressBar(
+        value=None,
+        visible=False,
+        height=2,
+        expand=True,
+        width=200,
+        margin=5
+       
+    )
     page.drawer = ft.NavigationDrawer(
         controls=[
             ft.Column(
@@ -763,6 +773,9 @@ async def HomeScreen(page: ft.Page, user_id, name):
     page.add(
         chat_area,
         attachment_container,
-        ft.Row([user_msg]),
+        ft.Row([
+            progress,
+            user_msg
+        ]),
     )
     page.update()
