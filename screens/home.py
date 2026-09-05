@@ -413,6 +413,22 @@ async def HomeScreen(page: ft.Page, user_id, name):
             page.update()
         except Exception as ex:
             print(f"show_msg: failed to render/send message ({ex}); continuing.")
+    colors = ["blue", "green", "purple", "orange", "red"]
+    async def thinking_animation():
+         i = 0
+         while user_msg.disabled:
+              user_msg.hint_style = ft.TextStyle(
+                  color=colors[i % len(colors)])
+              page.update()
+              i += 1
+              await asyncio.sleep(0.5)
+             
+             
+
+            
+
+
+    
 
     async def send_msg(e):
         nonlocal pending_image_path, pending_image_b64
@@ -438,9 +454,9 @@ async def HomeScreen(page: ft.Page, user_id, name):
 
         user_msg.value = ""
         clear_attachment()
-        progress.visible = True
+       
         user_msg.hint_text = "Thinking...."
-        user_msg.hint_style = ft.TextStyle(color="blue")
+        page.run_task(thinking_animation)
         user_msg.disabled = True
         
         if image_path or has_file:
@@ -493,7 +509,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
                 upload_progress.value = 1  
             user_msg.hint_text = "Ask anything...."
             user_msg.hint_style = ft.TextStyle(color="white")
-            progress.visible = False
+           
             user_msg.disabled = False
             page.update()
 
@@ -544,15 +560,8 @@ async def HomeScreen(page: ft.Page, user_id, name):
         center_title=True,
         bgcolor=ft.Colors.TRANSPARENT,
     )
-    progress = ft.ProgressBar(
-        value=None,
-        visible=False,
-        height=2,
-        expand=True,
-        width=200,
-        margin=5
-       
-    )
+   
+    
     page.drawer = ft.NavigationDrawer(
         controls=[
             ft.Column(
@@ -774,7 +783,7 @@ async def HomeScreen(page: ft.Page, user_id, name):
         chat_area,
         attachment_container,
         ft.Row([
-            progress,
+            
             user_msg
         ]),
     )
